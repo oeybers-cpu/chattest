@@ -3,13 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Chat proxy example</title>
+    <title>Academic Literacy Chat</title>
     <style>
       :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji'; }
       body { margin: 0; background: #0f172a; color: #e5e7eb; }
       .wrap { max-width: 800px; margin: 0 auto; padding: 24px; }
       h1 { font-size: 1.5rem; margin: 0 0 12px; }
-      .note { font-size: 0.9rem; color: #94a3b8; margin-bottom: 16px; }
       .chat { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 16px; min-height: 320px; }
       .msg { padding: 12px 14px; border-radius: 10px; margin: 8px 0; line-height: 1.4; white-space: pre-wrap; }
       .user { background: #1e293b; }
@@ -19,23 +18,18 @@
       button { padding: 10px 16px; border-radius: 10px; border: 1px solid #1f2937; background: #1f2937; color: #e5e7eb; cursor: pointer; }
       button:disabled { opacity: 0.6; cursor: not-allowed; }
       .error { color: #fecaca; margin-top: 8px; }
-      .small { font-size: 0.8rem; color: #94a3b8; margin-top: 4px; }
       a { color: #93c5fd; }
     </style>
   </head>
   <body>
     <div class="wrap">
-      <h1>Local chat (API key kept on server)</h1>
-      <p class="note">This page sends your message to <code>/api/chat</code>. The server holds the real API key in an environment variable. No keys are present in this file.</p>
-
+      <h1>Ask questions about academic literacy</h1>
       <div id="chat" class="chat" role="log" aria-live="polite"></div>
-
       <form id="form">
         <textarea id="input" placeholder="Type your message…" aria-label="Message"></textarea>
         <button id="send" type="submit">Send</button>
       </form>
       <div id="err" class="error" aria-live="polite"></div>
-      <p class="small">Tip: ensure your server proxy is running and exposes <code>POST /api/chat</code> that forwards JSON to OpenAI and returns the assistant reply.</p>
     </div>
 
     <script>
@@ -45,7 +39,7 @@
       const sendBtn = document.getElementById('send');
       const err = document.getElementById('err');
 
-      const messages = [{ role: 'system', content: 'You are a helpful assistant.' }];
+      const messages = [{ role: 'system', content: 'You are a helpful assistant specializing in academic literacy.' }];
 
       function addMessage(role, content) {
         const div = document.createElement('div');
@@ -61,7 +55,6 @@
         const text = input.value.trim();
         if (!text) return;
 
-        // show user message
         addMessage('user', text);
         messages.push({ role: 'user', content: text });
         input.value = '';
@@ -74,7 +67,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               model: 'gpt-4o-mini',
-              messages: messages.filter(m => m.role !== 'system') // most proxies ignore system
+              messages: messages.filter(m => m.role !== 'system')
             })
           });
 
