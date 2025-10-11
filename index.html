@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Academic Literacy Chat</title>
     <style>
@@ -28,95 +28,80 @@
         margin: 0 0 16px; 
         color: #fff; 
       }
-      .chat-container {
-        flex: 1;
-        background: #000;
-        border: 1px solid #333;
-        border-radius: 12px;
-        padding: 16px;
-        overflow-y: auto;
-        margin-bottom: 16px;
-        box-sizing: border-box;
+      .chat { 
+        flex: 1; 
+        background: #000; 
+        border: 1px solid #333; 
+        border-radius: 12px; 
+        padding: 16px; 
+        overflow-y: auto; 
+        margin-bottom: 16px; 
+        box-sizing: border-box; 
       }
-      .msg {
-        padding: 12px 14px;
-        border-radius: 10px;
-        margin: 8px 0;
-        line-height: 1.4;
-        white-space: pre-wrap;
-        max-width: 85%;
+      .msg { 
+        padding: 12px 14px; 
+        border-radius: 10px; 
+        margin: 8px 0; 
+        line-height: 1.4; 
+        white-space: pre-wrap; 
+        max-width: 85%; 
       }
-      .user {
-        background: #1e293b;
-        margin-left: auto;
-        color: #e5e7eb;
+      .user { 
+        background: #1e293b; 
+        margin-left: auto; 
+        color: #e5e7eb; 
       }
-      .assistant {
-        background: #0b3d2e;
-        color: #e5e7eb;
+      .assistant { 
+        background: #0b3d2e; 
+        color: #e5e7eb; 
       }
-      .input-container {
-        display: flex;
-        gap: 8px;
-        margin-top: 8px;
+      form { 
+        display: flex; 
+        gap: 8px; 
+        margin-top: 8px; 
       }
-      #userInput {
-        flex: 1;
-        padding: 10px 12px;
-        border-radius: 10px;
-        border: 1px solid #333;
-        background: #000;
-        color: #fff;
-        min-height: 56px;
-        resize: vertical;
-        font-size: 1rem;
+      textarea { 
+        flex: 1; 
+        padding: 10px 12px; 
+        border-radius: 10px; 
+        border: 1px solid #333; 
+        background: #000; 
+        color: #fff; 
+        min-height: 56px; 
+        resize: vertical; 
+        font-size: 1rem; 
       }
-      #sendBtn {
-        padding: 10px 16px;
-        border-radius: 10px;
-        border: 1px solid #333;
-        background: #333;
-        color: #fff;
-        cursor: pointer;
-        font-size: 1rem;
+      button { 
+        padding: 10px 16px; 
+        border-radius: 10px; 
+        border: 1px solid #333; 
+        background: #333; 
+        color: #fff; 
+        cursor: pointer; 
+        font-size: 1rem; 
       }
-      #sendBtn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
+      button:disabled { 
+        opacity: 0.6; 
+        cursor: not-allowed; 
       }
-      #responseBox {
-        background: #000;
-        border: 1px solid #333;
-        border-radius: 10px;
-        padding: 16px;
-        color: #e5e7eb;
-        font-family: inherit;
-        white-space: pre-wrap;
-        max-width: 100%;
-        min-height: 56px;
-        overflow: auto;
+      .error { 
+        color: #fecaca; 
+        margin-top: 8px; 
+        font-size: 0.9rem; 
       }
-      .error {
-        color: #fecaca;
-        margin-top: 8px;
-        font-size: 0.9rem;
-      }
-      a {
-        color: #93c5fd;
+      a { 
+        color: #93c5fd; 
       }
     </style>
   </head>
   <body>
     <div class="wrap">
       <h1>Ask questions about academic literacy</h1>
-      <div class="chat-container">
-        <div id="chat" class="chat" role="log" aria-live="polite"></div>
-        <pre id="responseBox"></pre>
-      </div>
-      <div class="input-container">
-        <input id="userInput" type="text" placeholder="Type a message…" aria-label="Message" />
-        <button id="sendBtn" type="button">Send</button>
-      </div>
+      <div id="chat" class="chat" role="log" aria-live="polite"></div>
+      <form id="form">
+        <textarea id="input" placeholder="Type your message…" aria-label="Message"></textarea>
+        <button id="send" type="submit">Send</button>
+      </form>
       <div id="err" class="error" aria-live="polite"></div>
     </div>
 
@@ -125,53 +110,55 @@
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ messages: [{ role: "user", content: message }] }),
+          body: JSON.stringify({ messages: [{ role: "user", content: message }] })
         });
-        const text = await res.text();
-        if (!text) throw new Error(`Empty response: ${res.status}`);
-        const data = JSON.parse(text);
-        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+        const text = await res.text(); // safer parsing
+        if (!text) throw new Error(`Empty response (HTTP ${res.status})`);
+
+        let data;
+        try { data = JSON.parse(text); }
+        catch { throw new Error("Server did not return valid JSON"); }
+
+        if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
         return data;
       }
 
-      document.getElementById("sendBtn").addEventListener("click", async () => {
-        const msg = document.getElementById("userInput").value.trim();
-        if (!msg) return;
-        
-        // Add user message to chat
-        const chat = document.getElementById('chat');
-        const userDiv = document.createElement('div');
-        userDiv.className = 'msg user';
-        userDiv.textContent = msg;
-        chat.appendChild(userDiv);
+      const chat = document.getElementById("chat");
+      const form = document.getElementById("form");
+      const input = document.getElementById("input");
+      const sendBtn = document.getElementById("send");
+      const err = document.getElementById("err");
+
+      function addMessage(role, content) {
+        const div = document.createElement("div");
+        div.className = "msg " + (role === "user" ? "user" : "assistant");
+        div.textContent = content;
+        chat.appendChild(div);
         chat.scrollTop = chat.scrollHeight;
-        
-        // Clear input and show loading state
-        document.getElementById("userInput").value = '';
-        document.getElementById("responseBox").textContent = "Loading...";
-        document.getElementById("sendBtn").disabled = true;
-        document.getElementById("err").textContent = '';
-        
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        err.textContent = "";
+        const text = input.value.trim();
+        if (!text) return;
+
+        addMessage("user", text);
+        input.value = "";
+        input.focus();
+        sendBtn.disabled = true;
+
         try {
-          const data = await sendMessage(msg);
-          const reply = data.choices?.[0]?.message?.content || JSON.stringify(data, null, 2);
-          document.getElementById("responseBox").textContent = reply;
-          
-          // Also add assistant message to chat
-          const assistantDiv = document.createElement('div');
-          assistantDiv.className = 'msg assistant';
-          assistantDiv.textContent = reply;
-          chat.appendChild(assistantDiv);
-          chat.scrollTop = chat.scrollHeight;
-        } catch (err) {
-          console.error(err);
-          document.getElementById("responseBox").textContent = err.message;
-          document.getElementById("err").textContent = err.message;
+          const data = await sendMessage(text);
+          const reply = data?.choices?.[0]?.message?.content ?? "(No response)";
+          addMessage("assistant", reply);
+        } catch (ex) {
+          err.textContent = ex.message || "Request failed";
         } finally {
-          document.getElementById("sendBtn").disabled = false;
+          sendBtn.disabled = false;
         }
       });
     </script>
   </body>
 </html>
-
