@@ -111,12 +111,24 @@
     }
     
     footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       padding: 0.5rem;
-      text-align: center;
       border-top: 1px solid #333;
       font-size: 0.9rem;
       opacity: 0.7;
       font-family: 'Inter', sans-serif;
+    }
+    
+    .footer-left {
+      display: flex;
+      align-items: center;
+    }
+    
+    .footer-right {
+      display: flex;
+      align-items: center;
     }
     
     /* Message styling */
@@ -279,13 +291,16 @@
         left: 0;
         right: 0;
         padding: 0.5rem;
-        text-align: center;
         border-top: 1px solid #333;
         font-size: 0.9rem;
         opacity: 0.7;
         font-family: 'Inter', sans-serif;
         z-index: 99;
         background: #000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
       }
       
       /* NEW MOBILE HEADER STYLING */
@@ -304,6 +319,14 @@
         display: block;
         margin: 0.5rem auto;
         width: fit-content;
+      }
+      
+      .footer-left {
+        margin-bottom: 0.5rem;
+      }
+      
+      .footer-right {
+        margin-top: 0.5rem;
       }
     }
   </style>
@@ -327,17 +350,24 @@
   </div>
 
   <footer>
-    <a href="#" class="footer-link">Top</a> | 
-    <a href="https://oeybers-cpu.github.io/a_lit_models/" class="footer-link">Home</a> | 
-    Designed by Dr Oscar Eybers 2025
+    <div class="footer-left">
+      <a href="#" class="footer-link">Top</a> | 
+      <a href="https://oeybers-cpu.github.io/a_lit_models/" class="footer-link">Home</a> | 
+      Designed by Dr Oscar Eybers 2025
+    </div>
+    <div class="footer-right">
+      <a href="https://www.free-counters.org/">... by Free-Counters.org</a>
+      <script type="text/javascript" src="https://www.freevisitorcounters.com/auth.php?id=e6296ca96d429e4da4d7339220ad2b44b6e86672"></script>
+      <script type="text/javascript" src="https://www.freevisitorcounters.com/en/home/counter/1405736/t/3"></script>
+    </div>
   </footer>
 
   <script>
     function escapeHTML(str) {
       return str.replace(/[&<>"']/g, m => ({
         '&': '&amp;',
-        '<': '<',
-        '>': '>',
+        '<': '&lt;',
+        '>': '&gt;',
         '"': '&quot;',
         "'": '&#039;'
       }[m]));
@@ -466,3 +496,4 @@
   </script>
 </body>
 </html>
+ounter now appears in the bottom right for desktop and is properly centered below the other footer content on mobile devices, with all elements staying within the footer boundaries.
