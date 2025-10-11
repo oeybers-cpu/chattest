@@ -97,14 +97,17 @@
     }
     
     button {
-      padding: 0.75rem 1.5rem;
+      padding: 0.5rem 1rem; /* Narrower padding */
       background: #333;
-      color: #fff;
+      color: #5dade2; /* Light blue text */
       border: 1px solid #333;
       border-radius: 4px;
       cursor: pointer;
       transition: all 0.2s;
       font-family: 'Inter', sans-serif;
+      min-width: 80px; /* Narrower width */
+      text-align: center; /* Center text horizontally */
+      line-height: 1.5; /* Center text vertically */
     }
     
     button:hover {
@@ -309,9 +312,10 @@
       
       button, .pdf-download-btn {
         width: 100%;
-        padding: 0.5rem 1rem;
+        padding: 0.4rem 0.8rem;
         margin: 0;
         font-size: 0.9rem;
+        min-width: auto;
       }
       
       .pdf-download-btn svg {
@@ -365,14 +369,17 @@
     
     /* PDF Download Button */
     .pdf-download-btn {
-      padding: 0.75rem 1.5rem;
+      padding: 0.5rem 1rem; /* Narrower padding */
       background: #333;
-      color: #fff;
+      color: #5dade2; /* Light blue text */
       border: 1px solid #333;
       border-radius: 4px;
       cursor: pointer;
       transition: all 0.2s;
       font-family: 'Inter', sans-serif;
+      min-width: 80px; /* Narrower width */
+      text-align: center; /* Center text horizontally */
+      line-height: 1.5; /* Center text vertically */
       margin-left: 0.5rem;
       display: flex;
       align-items: center;
