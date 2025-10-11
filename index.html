@@ -108,6 +108,7 @@
       font-family: 'Ubuntu', sans-serif;
       background: rgba(46, 204, 113, 0.1);
       border: 1px solid rgba(46, 204, 113, 0.2);
+      color: #f8f8f8; /* Off-white text for bot responses */
     }
     
     /* Markdown styling */
@@ -129,9 +130,14 @@
       list-style-type: disc;
     }
     
+    ol {
+      margin-bottom: 1em;
+      padding-left: 1.5em;
+    }
+    
     li {
-      margin-bottom: 0.3em;
-      line-height: 1.5;
+      margin-bottom: 0.8em; /* Increased spacing between list items */
+      line-height: 1.6;
     }
     
     strong {
@@ -182,14 +188,62 @@
     function escapeHTML(str) {
       return str.replace(/[&<>"']/g, m => ({
         '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
+        '<': '<',
+        '>': '>',
         '"': '&quot;',
         "'": '&#039;'
       }[m]));
     }
     
     function markdownToHTML(markdown) {
+      // Process ordered lists line by line
+      let lines = markdown.split('\n');
+      let inOl = false;
+      let newLines = [];
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.match(/^\d+\.\s/)) {
+          if (!inOl) {
+            newLines.push('<ol>');
+            inOl = true;
+          }
+          const content = line.replace(/^\d+\.\s/, '');
+          newLines.push(`<li>${content}</li>`);
+        } else {
+          if (inOl) {
+            newLines.push('</ol>');
+            inOl = false;
+          }
+          newLines.push(line);
+        }
+      }
+      if (inOl) newLines.push('</ol>');
+      markdown = newLines.join('\n');
+      
+      // Process unordered lists line by line
+      lines = markdown.split('\n');
+      inOl = false;
+      newLines = [];
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.match(/^\*\s/)) {
+          if (!inOl) {
+            newLines.push('<ul>');
+            inOl = true;
+          }
+          const content = line.replace(/^\*\s/, '');
+          newLines.push(`<li>${content}</li>`);
+        } else {
+          if (inOl) {
+            newLines.push('</ul>');
+            inOl = false;
+          }
+          newLines.push(line);
+        }
+      }
+      if (inOl) newLines.push('</ul>');
+      markdown = newLines.join('\n');
+      
       // Headers
       markdown = markdown.replace(/^# (.*)$/gm, '<h1>$1</h1>');
       markdown = markdown.replace(/^## (.*)$/gm, '<h2>$1</h2>');
@@ -200,9 +254,6 @@
       markdown = markdown.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
       // Inline code
       markdown = markdown.replace(/`(.*?)`/g, '<code>$1</code>');
-      // Lists
-      markdown = markdown.replace(/^\* (.*)$/gm, '<li>$1</li>');
-      markdown = markdown.replace(/(<li>.*?<\/li>)/g, '<ul>$1</ul>');
       return markdown;
     }
     
