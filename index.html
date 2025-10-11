@@ -92,7 +92,7 @@
     
     /* Message styling */
     .message {
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem; /* Increased space between messages */
       padding: 1rem;
       border-radius: 8px;
     }
@@ -125,18 +125,18 @@
     }
     
     ul {
-      margin-bottom: 1em;
+      margin-bottom: 1.2em;
       padding-left: 1.5em;
       list-style-type: disc;
     }
     
-    ol {
-      margin-bottom: 1em;
-      padding-left: 1.5em;
+    li {
+      margin-bottom: 1.2em; /* Increased space between bullet points */
+      line-height: 1.6;
     }
     
-    li {
-      margin-bottom: 0.8em; /* Increased spacing between list items */
+    p {
+      margin-bottom: 1.2em; /* Spacing between paragraphs */
       line-height: 1.6;
     }
     
@@ -188,60 +188,36 @@
     function escapeHTML(str) {
       return str.replace(/[&<>"']/g, m => ({
         '&': '&amp;',
-        '<': '<',
-        '>': '>',
+        '<': '&lt;',
+        '>': '&gt;',
         '"': '&quot;',
         "'": '&#039;'
       }[m]));
     }
     
     function markdownToHTML(markdown) {
-      // Process ordered lists line by line
+      // Process unordered lists
       let lines = markdown.split('\n');
-      let inOl = false;
+      let inUl = false;
       let newLines = [];
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        if (line.match(/^\d+\.\s/)) {
-          if (!inOl) {
-            newLines.push('<ol>');
-            inOl = true;
-          }
-          const content = line.replace(/^\d+\.\s/, '');
-          newLines.push(`<li>${content}</li>`);
-        } else {
-          if (inOl) {
-            newLines.push('</ol>');
-            inOl = false;
-          }
-          newLines.push(line);
-        }
-      }
-      if (inOl) newLines.push('</ol>');
-      markdown = newLines.join('\n');
-      
-      // Process unordered lists line by line
-      lines = markdown.split('\n');
-      inOl = false;
-      newLines = [];
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
         if (line.match(/^\*\s/)) {
-          if (!inOl) {
+          if (!inUl) {
             newLines.push('<ul>');
-            inOl = true;
+            inUl = true;
           }
           const content = line.replace(/^\*\s/, '');
           newLines.push(`<li>${content}</li>`);
         } else {
-          if (inOl) {
+          if (inUl) {
             newLines.push('</ul>');
-            inOl = false;
+            inUl = false;
           }
           newLines.push(line);
         }
       }
-      if (inOl) newLines.push('</ul>');
+      if (inUl) newLines.push('</ul>');
       markdown = newLines.join('\n');
       
       // Headers
@@ -254,6 +230,12 @@
       markdown = markdown.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
       // Inline code
       markdown = markdown.replace(/`(.*?)`/g, '<code>$1</code>');
+      
+      // Handle paragraphs and line breaks
+      markdown = markdown.replace(/\n{2,}/g, '</p><p>');
+      markdown = markdown.replace(/\n/g, '<br>');
+      markdown = `<p>${markdown}</p>`;
+      
       return markdown;
     }
     
