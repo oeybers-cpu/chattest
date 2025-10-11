@@ -25,6 +25,15 @@
       padding: 1rem;
       text-align: center;
       border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .header-left {
+      display: flex;
+      flex-direction: column;
     }
     
     header h1 {
@@ -37,6 +46,26 @@
     header p {
       font-size: 0.9rem;
       opacity: 0.8;
+    }
+    
+    .academic-hub-link {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: rgba(52, 73, 94, 0.15);
+      color: #3498db;
+      border: 1px solid rgba(52, 73, 94, 0.2);
+      border-radius: 4px;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      margin-top: 0.5rem;
+    }
+    
+    .academic-hub-link:hover {
+      background: rgba(52, 73, 94, 0.25);
+      color: #fff;
+      transform: translateY(-1px);
     }
     
     .chat-container {
@@ -111,6 +140,18 @@
       color: #f8f8f8;
     }
     
+    .message-header {
+      color: #3498db;
+      font-weight: bold;
+      margin-bottom: 1.2em;
+      font-size: 1.1rem;
+    }
+    
+    .message-content {
+      margin-top: 0.5em;
+      line-height: 1.6;
+    }
+    
     /* Section styling */
     .section {
       margin-bottom: 1.5em;
@@ -122,6 +163,7 @@
       color: #3498db;
       margin-bottom: 0.8em;
       font-family: 'Ubuntu', sans-serif;
+      font-size: 1.5em;
     }
     
     .section ul {
@@ -133,6 +175,20 @@
     .section li {
       margin-bottom: 0.8em;
       line-height: 1.6;
+      padding-left: 0.5em;
+    }
+    
+    .section p {
+      margin-bottom: 1.2em;
+      line-height: 1.6;
+      text-indent: 0;
+    }
+    
+    .section.blockquote {
+      border-left: 3px solid #3498db;
+      padding-left: 1em;
+      margin: 1em 0;
+      font-style: italic;
     }
     
     .section.academic {
@@ -168,11 +224,6 @@
       font-size: 1.5em;
     }
     
-    p {
-      margin-bottom: 1.2em;
-      line-height: 1.6;
-    }
-    
     strong {
       font-weight: 600;
       color: #3498db;
@@ -202,12 +253,14 @@
 </head>
 <body>
   <header>
-    <h1>ALLChat</h1>
-    <p>Ask any question about literacies or knowledge</p>
+    <div class="header-left">
+      <h1>ALLChat</h1>
+      <p>Ask any question about literacies or knowledge</p>
+    </div>
+    <a href="https://oeybers-cpu.github.io/a_lit_models/" class="academic-hub-link">Academic Literacy Hub</a>
   </header>
 
   <div class="chat-container">
-    <!-- START EMPTY - NO PRELOADED CONTENT -->
     <div id="out"></div>
   </div>
 
@@ -255,6 +308,11 @@
             currentSection = '<ul>';
           }
           currentSection += `<li>${line.substring(2)}</li>`;
+        } else if (line.startsWith('> ')) {
+          if (!currentSection) {
+            currentSection = '<div class="section blockquote">';
+          }
+          currentSection += `<p>${line.substring(2)}</p>`;
         } else if (line === '') {
           if (currentSection && currentSection.endsWith('</ul>')) {
             currentSection += '</ul>';
@@ -271,6 +329,8 @@
       if (currentSection) {
         if (currentSection.startsWith('<ul>')) {
           currentSection += '</ul>';
+        } else if (currentSection.startsWith('<div class="section blockquote">')) {
+          currentSection += '</div>';
         }
         sections.push({
           type: currentType,
@@ -293,7 +353,7 @@
       const content = input.value.trim();
       if (!content) return;
       
-      // Add user message
+      // Add user message with proper spacing
       const escapedUser = escapeHTML(content);
       out.innerHTML += `
         <div class="message user">
