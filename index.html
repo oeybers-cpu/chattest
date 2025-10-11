@@ -253,6 +253,41 @@
       color: #fff;
       transform: translateY(-1px);
     }
+    
+    /* MOBILE FIXES START HERE */
+    @media (max-width: 768px) {
+      .chat-container {
+        max-height: calc(100vh - 10rem); /* Leave space for header, input area, and footer */
+        margin-bottom: 5rem; /* Space for input area */
+      }
+      
+      .input-area {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 0.5rem;
+        background: #000;
+        border-top: 1px solid #333;
+        z-index: 100;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+      }
+      
+      footer {
+        position: fixed;
+        bottom: 5rem; /* Adjusted to sit above input area */
+        left: 0;
+        right: 0;
+        padding: 0.5rem;
+        text-align: center;
+        border-top: 1px solid #333;
+        font-size: 0.9rem;
+        opacity: 0.7;
+        font-family: 'Inter', sans-serif;
+        z-index: 99;
+        background: #000;
+      }
+    }
   </style>
 </head>
 <body>
@@ -413,3 +448,5 @@
   </script>
 </body>
 </html>
+
+These changes ensure that on mobile devices, the entire chat interface is visible when first loading the page, with the input area always accessible at the bottom of the screen.
