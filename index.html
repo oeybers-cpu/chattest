@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ALLChat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -40,7 +41,7 @@
       flex: 1;
       padding: 1rem;
       overflow-y: auto;
-      background: #000; /* Changed to pure black */
+      background: #000;
       border-radius: 8px;
       margin: 0 1rem;
     }
@@ -48,7 +49,7 @@
     #out {
       white-space: pre-wrap;
       padding: 1rem;
-      color: #fff; /* Explicit white text */
+      color: #fff;
     }
     
     .input-area {
@@ -90,6 +91,29 @@
       opacity: 0.7;
     }
     
+    /* Markdown styling */
+    h1, h2, h3 {
+      font-family: 'Ubuntu', sans-serif;
+      color: #2c3e50;
+      margin-top: 1em;
+      margin-bottom: 0.5em;
+    }
+    
+    ul {
+      padding-left: 1.5em;
+      list-style-type: disc;
+      margin: 1em 0;
+    }
+    
+    li {
+      margin-bottom: 0.3em;
+    }
+    
+    strong {
+      font-weight: 600;
+      color: #34495e;
+    }
+    
     /* Scrollbar styling */
     ::-webkit-scrollbar {
       width: 8px;
@@ -112,7 +136,7 @@
   </header>
 
   <div class="chat-container">
-    <pre id="out"></pre>
+    <div id="out"></div>
   </div>
 
   <div class="input-area">
@@ -123,14 +147,38 @@
   <footer>Designed by Dr Oscar Eybers 2025</footer>
 
   <script>
+    function escapeHTML(str) {
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      }[m]));
+    }
+    
+    function markdownToHTML(markdown) {
+      // Headers
+      markdown = markdown.replace(/^# (.*)$/gm, '<h1>$1</h1>');
+      markdown = markdown.replace(/^## (.*)$/gm, '<h2>$1</h2>');
+      markdown = markdown.replace(/^### (.*)$/gm, '<h3>$1</h3>');
+      // Bold
+      markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      // Lists
+      markdown = markdown.replace(/^\* (.*)$/gm, '<li>$1</li>');
+      markdown = markdown.replace(/(<li>.*?<\/li>)/g, '<ul>$1</ul>');
+      return markdown;
+    }
+    
     const input = document.getElementById("input");
     const out = document.getElementById("out");
     document.getElementById("send").addEventListener("click", async () => {
       const content = input.value.trim();
       if (!content) return;
       
-      // Add user message to chat
-      out.textContent += `\n\nYou: ${content}`;
+      // Add user message (escaped for safety)
+      const escapedUser = escapeHTML(content);
+      out.innerHTML += `<div class="message user">You: ${escapedUser}</div>`;
       input.value = '';
       
       try {
@@ -145,10 +193,12 @@
         const data = await res.json();
         const reply = data?.choices?.[0]?.message?.content || "No response from server";
         
-        // Add bot response to chat
-        out.textContent += `\n\nBot: ${reply}`;
+        // Convert markdown to HTML and add bot response
+        const htmlResponse = markdownToHTML(reply);
+        out.innerHTML += `<div class="message bot">AllChat: ${htmlResponse}</div>`;
       } catch (e) {
-        out.textContent += `\n\nError: ${e.message}`;
+        const escapedError = escapeHTML(e.message);
+        out.innerHTML += `<div class="message error">Error: ${escapedError}</div>`;
       }
       
       // Auto-scroll to bottom
