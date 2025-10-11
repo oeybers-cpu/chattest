@@ -92,7 +92,7 @@
     
     /* Message styling */
     .message {
-      margin-bottom: 2rem; /* Increased space between messages */
+      margin-bottom: 2rem;
       padding: 1rem;
       border-radius: 8px;
     }
@@ -108,7 +108,51 @@
       font-family: 'Ubuntu', sans-serif;
       background: rgba(46, 204, 113, 0.1);
       border: 1px solid rgba(46, 204, 113, 0.2);
-      color: #f8f8f8; /* Off-white text for bot responses */
+      color: #f8f8f8;
+    }
+    
+    /* Section styling */
+    .section {
+      margin-bottom: 1.5em;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    
+    .section h2 {
+      color: #3498db;
+      margin-bottom: 0.8em;
+      font-family: 'Ubuntu', sans-serif;
+    }
+    
+    .section ul {
+      padding-left: 1.5em;
+      list-style-type: disc;
+      margin: 0;
+    }
+    
+    .section li {
+      margin-bottom: 0.8em;
+      line-height: 1.6;
+    }
+    
+    .section.academic {
+      background: rgba(52, 73, 94, 0.15);
+      border: 1px solid rgba(52, 73, 94, 0.2);
+    }
+    
+    .section.cultural {
+      background: rgba(46, 204, 113, 0.15);
+      border: 1px solid rgba(46, 204, 113, 0.2);
+    }
+    
+    .section.technical {
+      background: rgba(155, 89, 182, 0.15);
+      border: 1px solid rgba(155, 89, 182, 0.2);
+    }
+    
+    .section.social {
+      background: rgba(231, 76, 60, 0.15);
+      border: 1px solid rgba(231, 76, 60, 0.2);
     }
     
     /* Markdown styling */
@@ -124,19 +168,8 @@
       font-size: 1.5em;
     }
     
-    ul {
-      margin-bottom: 1.2em;
-      padding-left: 1.5em;
-      list-style-type: disc;
-    }
-    
-    li {
-      margin-bottom: 1.2em; /* Increased space between bullet points */
-      line-height: 1.6;
-    }
-    
     p {
-      margin-bottom: 1.2em; /* Spacing between paragraphs */
+      margin-bottom: 1.2em;
       line-height: 1.6;
     }
     
@@ -174,7 +207,19 @@
   </header>
 
   <div class="chat-container">
-    <div id="out"></div>
+    <div id="out">
+      <div class="section academic">
+        <h2>ALLChat</h2>
+        <p>Academic literacy empowers African students in several ways:</p>
+        <ul>
+          <li>Enhances critical thinking and analytical skills</li>
+          <li>Improves academic performance</li>
+          <li>Facilitates access to scholarly knowledge</li>
+          <li>Bridges educational gaps</li>
+          <li>Encourages cultural inclusion and lifelong learning</li>
+        </ul>
+      </div>
+    </div>
   </div>
 
   <div class="input-area">
@@ -196,47 +241,55 @@
     }
     
     function markdownToHTML(markdown) {
-      // Process unordered lists
-      let lines = markdown.split('\n');
-      let inUl = false;
-      let newLines = [];
+      // Process markdown to structured sections
+      let sections = [];
+      let currentSection = null;
+      let currentType = null;
+      
+      const lines = markdown.split('\n');
       for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        if (line.match(/^\*\s/)) {
-          if (!inUl) {
-            newLines.push('<ul>');
-            inUl = true;
+        const line = lines[i].trim();
+        
+        // Check for section headers
+        if (line.startsWith('## ')) {
+          if (currentSection) {
+            sections.push({
+              type: currentType,
+              content: currentSection
+            });
+            currentSection = '';
           }
-          const content = line.replace(/^\*\s/, '');
-          newLines.push(`<li>${content}</li>`);
+          currentType = line.substring(3).toLowerCase().replace(/\s+/g, '-');
+          currentSection = `<h2>${line.substring(3)}</h2>`;
+        } else if (line.startsWith('* ')) {
+          if (!currentSection) {
+            currentSection = '';
+          }
+          currentSection += `<li>${line.substring(2)}</li>`;
+        } else if (line === '') {
+          continue;
         } else {
-          if (inUl) {
-            newLines.push('</ul>');
-            inUl = false;
+          if (!currentSection) {
+            currentSection = '';
           }
-          newLines.push(line);
+          currentSection += `<p>${line}</p>`;
         }
       }
-      if (inUl) newLines.push('</ul>');
-      markdown = newLines.join('\n');
       
-      // Headers
-      markdown = markdown.replace(/^# (.*)$/gm, '<h1>$1</h1>');
-      markdown = markdown.replace(/^## (.*)$/gm, '<h2>$1</h2>');
-      markdown = markdown.replace(/^### (.*)$/gm, '<h3>$1</h3>');
-      // Bold
-      markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      // Code blocks
-      markdown = markdown.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-      // Inline code
-      markdown = markdown.replace(/`(.*?)`/g, '<code>$1</code>');
+      if (currentSection) {
+        sections.push({
+          type: currentType,
+          content: currentSection
+        });
+      }
       
-      // Handle paragraphs and line breaks
-      markdown = markdown.replace(/\n{2,}/g, '</p><p>');
-      markdown = markdown.replace(/\n/g, '<br>');
-      markdown = `<p>${markdown}</p>`;
+      // Build final HTML
+      let html = '';
+      for (let section of sections) {
+        html += `<div class="section ${section.type}">${section.content}</div>`;
+      }
       
-      return markdown;
+      return html;
     }
     
     const input = document.getElementById("input");
