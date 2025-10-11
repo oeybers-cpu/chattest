@@ -82,7 +82,7 @@
       display: flex;
       padding: 0.5rem;
       border-top: 1px solid #333;
-      gap: 0.3rem; /* Added gap between buttons */
+      gap: 0.3rem;
     }
     
     input {
@@ -98,17 +98,17 @@
     }
     
     button {
-      padding: 0.2rem 0.4rem; /* Reduced padding for smaller size */
+      padding: 0.2rem 0.4rem;
       background: #333;
-      color: #5dade2; /* Light blue text */
+      color: #5dade2;
       border: 1px solid #333;
       border-radius: 4px;
       cursor: pointer;
       transition: all 0.2s;
       font-family: 'Inter', sans-serif;
-      min-width: 40px; /* Narrower width */
-      text-align: center; /* Center text horizontally */
-      line-height: 1.2; /* Center text vertically */
+      min-width: 40px;
+      text-align: center;
+      line-height: 1.2;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -291,59 +291,42 @@
     /* MOBILE FIXES */
     @media (max-width: 768px) {
       .chat-container {
-        max-height: calc(100vh - 10rem);
-        margin-bottom: 5rem;
+        max-height: calc(100vh - 14rem);
+        margin: 0 1rem;
+        overflow-y: auto;
       }
       
       .input-area {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 0.5rem;
-        background: #000;
-        border-top: 1px solid #333;
-        z-index: 100;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
         display: flex;
         flex-direction: column;
-        gap: 0.2rem; /* Reduced gap for mobile */
+        padding: 0.5rem;
+        border-top: 1px solid #333;
+        gap: 0.2rem;
+        margin-bottom: 1rem;
       }
       
       input {
         width: 100%;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.2rem;
       }
       
       button, .pdf-download-btn {
         width: 100%;
-        padding: 0.15rem 0.3rem; /* Even smaller padding for mobile */
-        margin: 0;
-        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.9rem;
         min-width: auto;
       }
       
       .pdf-download-btn svg {
-        width: 12px;
-        height: 12px;
+        width: 14px;
+        height: 14px;
       }
       
       footer {
-        position: fixed;
-        bottom: 5rem;
-        left: 0;
-        right: 0;
         padding: 0.5rem;
         border-top: 1px solid #333;
-        font-size: 0.9rem;
-        opacity: 0.7;
-        font-family: 'Inter', sans-serif;
-        z-index: 99;
-        background: #000;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
         text-align: center;
+        margin-top: 0.5rem;
       }
       
       header {
@@ -377,8 +360,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 0.2rem; /* Small gap between icon and text */
-      min-width: 40px; /* Same narrow width as send button */
+      gap: 0.2rem;
+      min-width: 40px;
     }
     
     .pdf-download-btn:hover {
@@ -386,8 +369,8 @@
     }
     
     .pdf-download-btn svg {
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
     }
   </style>
 </head>
@@ -440,7 +423,6 @@
     }
     
     function markdownToHTML(markdown) {
-      // Process markdown to structured sections without symbols
       let sections = [];
       let currentSection = null;
       let currentType = null;
@@ -449,7 +431,6 @@
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
         
-        // Check for section headers
         if (line.startsWith('## ')) {
           if (currentSection) {
             sections.push({
@@ -495,13 +476,11 @@
         });
       }
       
-      // Build final HTML
       let html = '';
       for (let section of sections) {
         html += `<div class="section ${section.type}">${section.content}</div>`;
       }
       
-      // Process bold text (replace **text** with <strong>text</strong>)
       html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       
       return html;
@@ -512,21 +491,17 @@
     const sendButton = document.getElementById("send");
     const downloadPDFButton = document.getElementById("download-pdf");
     
-    // PDF Download Functionality
     downloadPDFButton.addEventListener('click', () => {
       const chatContainer = document.querySelector('.chat-container');
       if (!chatContainer) return;
       
-      // Clone the container for PDF
       const clone = chatContainer.cloneNode(true);
       
-      // Apply PDF-specific styling
       clone.style.backgroundColor = 'white';
       clone.style.padding = '1rem';
       clone.style.fontFamily = 'Arial, sans-serif';
       clone.style.fontSize = '14px';
       
-      // Style messages for PDF
       const messages = clone.querySelectorAll('.message');
       messages.forEach(msg => {
         msg.style.backgroundColor = 'white';
@@ -537,7 +512,6 @@
         msg.style.boxShadow = 'none';
       });
       
-      // Style user and bot messages
       clone.querySelectorAll('.user').forEach(msg => {
         msg.style.backgroundColor = '#f0f0f0';
       });
@@ -545,7 +519,6 @@
         msg.style.backgroundColor = '#f8f8f8';
       });
       
-      // Style headers in messages
       clone.querySelectorAll('.section h2').forEach(h2 => {
         h2.style.color = '#333';
         h2.style.borderBottom = '1px solid #eee';
@@ -553,7 +526,6 @@
         h2.style.marginBottom = '0.8em';
       });
       
-      // Style lists
       clone.querySelectorAll('.section ul').forEach(ul => {
         ul.style.paddingLeft = '1.5em';
         ul.style.listStyleType = 'disc';
@@ -562,7 +534,6 @@
         li.style.marginBottom = '0.5em';
       });
       
-      // Style blockquotes
       clone.querySelectorAll('.section.blockquote').forEach(blockquote => {
         blockquote.style.borderLeft = '3px solid #3498db';
         blockquote.style.paddingLeft = '1em';
@@ -573,7 +544,6 @@
         blockquote.style.borderRadius = '0 4px 4px 0';
       });
       
-      // Style code
       clone.querySelectorAll('.section code').forEach(code => {
         code.style.background = '#f5f5f5';
         code.style.padding = '0.2em 0.4em';
@@ -581,20 +551,17 @@
         code.style.border = '1px solid #ddd';
       });
       
-      // Style message headers
       clone.querySelectorAll('.message-header').forEach(header => {
         header.style.color = '#333';
         header.style.fontWeight = 'bold';
         header.style.marginBottom = '1em';
       });
       
-      // Style message content
       clone.querySelectorAll('.message-content').forEach(content => {
         content.style.color = '#333';
         content.style.lineHeight = '1.6';
       });
       
-      // Generate PDF
       const opt = {
         margin: 1,
         filename: 'chat-history.pdf',
@@ -606,12 +573,10 @@
       html2pdf().from(clone).set(opt).save();
     });
     
-    // Send message functionality
     sendButton.addEventListener("click", async () => {
       const content = input.value.trim();
       if (!content) return;
       
-      // Add user message
       const escapedUser = escapeHTML(content);
       out.innerHTML += `
         <div class="message user">
@@ -632,7 +597,6 @@
         const data = await res.json();
         const reply = data?.choices?.[0]?.message?.content || "No response from server";
         
-        // Convert markdown to HTML and add bot response
         const htmlResponse = markdownToHTML(reply);
         out.innerHTML += `
           <div class="message bot">
@@ -648,12 +612,10 @@
           </div>`;
       }
       
-      // Auto-scroll to bottom
       const container = document.querySelector('.chat-container');
       container.scrollTop = container.scrollHeight;
     });
     
-    // Enter key to send
     input.addEventListener("keypress", (e) => {
       if (e.key === "Enter") sendButton.click();
     });
