@@ -106,13 +106,26 @@
     </div>
 
     <script>
+      // Define the sendMessage function exactly as provided
+      async function sendMessage(message) {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: [{ role: "user", content: message }] }),
+        });
+        const data = await res.json();
+        console.log(data);
+        return data; // Added return for UI usage
+      }
+
       const chat = document.getElementById('chat');
       const form = document.getElementById('form');
       const input = document.getElementById('input');
       const sendBtn = document.getElementById('send');
       const err = document.getElementById('err');
 
-      const messages = [{ role: 'system', content: 'You are a helpful assistant specializing in academic literacy.' }];
+      // Removed messages array since we're using the new sendMessage function
+      // which doesn't maintain history (for this implementation)
 
       function addMessage(role, content) {
         const div = document.createElement('div');
@@ -128,31 +141,17 @@
         const text = input.value.trim();
         if (!text) return;
 
+        // Add user message to UI immediately
         addMessage('user', text);
-        messages.push({ role: 'user', content: text });
         input.value = '';
         input.focus();
         sendBtn.disabled = true;
 
         try {
-          const resp = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              model: 'gpt-4o-mini',
-              messages: messages.filter(m => m.role !== 'system')
-            })
-          });
-
-          if (!resp.ok) {
-            const t = await resp.text();
-            throw new Error(`Server error ${resp.status}: ${t}`);
-          }
-
-          const data = await resp.json();
+          // Use the embedded sendMessage function
+          const data = await sendMessage(text);
           const reply = data?.choices?.[0]?.message?.content ?? '(No content)';
           addMessage('assistant', reply);
-          messages.push({ role: 'assistant', content: reply });
         } catch (ex) {
           console.error(ex);
           err.textContent = ex.message;
