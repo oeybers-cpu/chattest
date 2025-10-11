@@ -184,7 +184,8 @@
       border-radius: 10px;
     }
     
-    .section h2 {
+    /* New heading style for response formatting */
+    .section-heading {
       color: #3498db;
       margin-bottom: 0.8em;
       font-family: 'Inter', sans-serif;
@@ -423,66 +424,49 @@
     }
     
     function markdownToHTML(markdown) {
-      let sections = [];
-      let currentSection = null;
-      let currentType = null;
-      
+      let html = '';
+      let inList = false;
+
       const lines = markdown.split('\n');
       for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        
-        if (line.startsWith('## ')) {
-          if (currentSection) {
-            sections.push({
-              type: currentType,
-              content: currentSection
-            });
-            currentSection = '';
+        let line = lines[i].trim();
+
+        // Check for bold heading: starts and ends with **
+        if (line.startsWith('**') && line.endsWith('**')) {
+          // Remove the asterisks and wrap in strong with class
+          const text = line.substring(2, line.length - 2);
+          html += `<strong class="section-heading">${text}</strong><br>`;
+          inList = false; // reset list context
+        }
+        // Check for list item
+        else if (line.startsWith('- ')) {
+          if (!inList) {
+            // Start a new list
+            html += '<ul>';
+            inList = true;
           }
-          currentType = line.substring(3).toLowerCase().replace(/\s+/g, '-');
-          currentSection = `<h2>${line.substring(3)}</h2>`;
-        } else if (line.startsWith('* ')) {
-          if (!currentSection) {
-            currentSection = '<ul>';
-          }
-          currentSection += `<li>${line.substring(2)}</li>`;
-        } else if (line.startsWith('> ')) {
-          if (!currentSection) {
-            currentSection = '<div class="section blockquote">';
-          }
-          currentSection += `<p>${line.substring(2)}</p>`;
-        } else if (line === '') {
-          if (currentSection && currentSection.endsWith('</ul>')) {
-            currentSection += '</ul>';
-          }
+          html += `<li>${line.substring(2)}</li>`;
+        }
+        // Check for empty line: skip (we'll rely on CSS for spacing)
+        else if (line === '') {
           continue;
-        } else {
-          if (!currentSection) {
-            currentSection = '';
+        }
+        // Otherwise, it's a paragraph
+        else {
+          // If we are in a list, close the list first
+          if (inList) {
+            html += '</ul>';
+            inList = false;
           }
-          currentSection += `<p>${line}</p>`;
+          html += `<p>${line}</p>`;
         }
       }
-      
-      if (currentSection) {
-        if (currentSection.startsWith('<ul>')) {
-          currentSection += '</ul>';
-        } else if (currentSection.startsWith('<div class="section blockquote">')) {
-          currentSection += '</div>';
-        }
-        sections.push({
-          type: currentType,
-          content: currentSection
-        });
+
+      // Close any open list
+      if (inList) {
+        html += '</ul>';
       }
-      
-      let html = '';
-      for (let section of sections) {
-        html += `<div class="section ${section.type}">${section.content}</div>`;
-      }
-      
-      html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      
+
       return html;
     }
     
@@ -519,11 +503,11 @@
         msg.style.backgroundColor = '#f8f8f8';
       });
       
-      clone.querySelectorAll('.section h2').forEach(h2 => {
-        h2.style.color = '#333';
-        h2.style.borderBottom = '1px solid #eee';
-        h2.style.paddingBottom = '0.5em';
-        h2.style.marginBottom = '0.8em';
+      clone.querySelectorAll('.section-heading').forEach(heading => {
+        heading.style.color = '#333';
+        heading.style.borderBottom = '1px solid #eee';
+        heading.style.paddingBottom = '0.5em';
+        heading.style.marginBottom = '0.8em';
       });
       
       clone.querySelectorAll('.section ul').forEach(ul => {
@@ -597,6 +581,7 @@
         const data = await res.json();
         const reply = data?.choices?.[0]?.message?.content || "No response from server";
         
+        // Convert markdown to HTML and add bot response
         const htmlResponse = markdownToHTML(reply);
         out.innerHTML += `
           <div class="message bot">
@@ -612,6 +597,7 @@
           </div>`;
       }
       
+      // Auto-scroll to bottom
       const container = document.querySelector('.chat-container');
       container.scrollTop = container.scrollHeight;
     });
