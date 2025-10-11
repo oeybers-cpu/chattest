@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ALLChat</title>
-  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -18,7 +18,7 @@
       min-height: 100vh;
       background: #000;
       color: #fff;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
     
     header {
@@ -30,6 +30,8 @@
     header h1 {
       font-size: 1.5rem;
       margin-bottom: 0.3rem;
+      font-family: 'Ubuntu', sans-serif;
+      color: #3498db; /* Brighter blue for headers */
     }
     
     header p {
@@ -44,12 +46,6 @@
       background: #000;
       border-radius: 8px;
       margin: 0 1rem;
-    }
-    
-    #out {
-      white-space: pre-wrap;
-      padding: 1rem;
-      color: #fff;
     }
     
     .input-area {
@@ -67,6 +63,7 @@
       border-radius: 4px;
       margin-right: 0.5rem;
       font-size: 1rem;
+      font-family: 'Inter', sans-serif;
     }
     
     button {
@@ -77,6 +74,7 @@
       border-radius: 4px;
       cursor: pointer;
       transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
     }
     
     button:hover {
@@ -89,14 +87,36 @@
       border-top: 1px solid #333;
       font-size: 0.9rem;
       opacity: 0.7;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    /* Message styling */
+    .message {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    
+    .user {
+      font-family: 'Inter', sans-serif;
+      background: rgba(52, 73, 94, 0.1);
+      border: 1px solid rgba(52, 73, 94, 0.2);
+      font-weight: 500;
+    }
+    
+    .bot {
+      font-family: 'Ubuntu', sans-serif;
+      background: rgba(46, 204, 113, 0.1);
+      border: 1px solid rgba(46, 204, 113, 0.2);
     }
     
     /* Markdown styling */
     h1, h2, h3 {
       font-family: 'Ubuntu', sans-serif;
-      color: #2c3e50;
-      margin-top: 1em;
-      margin-bottom: 0.5em;
+      color: #3498db;
+      margin-top: 1.2em;
+      margin-bottom: 0.6em;
+      line-height: 1.4;
     }
     
     ul {
@@ -107,11 +127,19 @@
     
     li {
       margin-bottom: 0.3em;
+      line-height: 1.5;
     }
     
     strong {
       font-weight: 600;
-      color: #34495e;
+      color: #3498db;
+    }
+    
+    code {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+      font-family: 'Inter', monospace;
     }
     
     /* Scrollbar styling */
@@ -164,6 +192,10 @@
       markdown = markdown.replace(/^### (.*)$/gm, '<h3>$1</h3>');
       // Bold
       markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      // Code blocks
+      markdown = markdown.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+      // Inline code
+      markdown = markdown.replace(/`(.*?)`/g, '<code>$1</code>');
       // Lists
       markdown = markdown.replace(/^\* (.*)$/gm, '<li>$1</li>');
       markdown = markdown.replace(/(<li>.*?<\/li>)/g, '<ul>$1</ul>');
@@ -176,9 +208,13 @@
       const content = input.value.trim();
       if (!content) return;
       
-      // Add user message (escaped for safety)
+      // Add user message
       const escapedUser = escapeHTML(content);
-      out.innerHTML += `<div class="message user">You: ${escapedUser}</div>`;
+      out.innerHTML += `
+        <div class="message user">
+          <div class="message-header">You</div>
+          <div class="message-content">${escapedUser}</div>
+        </div>`;
       input.value = '';
       
       try {
@@ -195,10 +231,18 @@
         
         // Convert markdown to HTML and add bot response
         const htmlResponse = markdownToHTML(reply);
-        out.innerHTML += `<div class="message bot">AllChat: ${htmlResponse}</div>`;
+        out.innerHTML += `
+          <div class="message bot">
+            <div class="message-header">AllChat</div>
+            <div class="message-content">${htmlResponse}</div>
+          </div>`;
       } catch (e) {
         const escapedError = escapeHTML(e.message);
-        out.innerHTML += `<div class="message error">Error: ${escapedError}</div>`;
+        out.innerHTML += `
+          <div class="message error">
+            <div class="message-header">Error</div>
+            <div class="message-content">${escapedError}</div>
+          </div>`;
       }
       
       // Auto-scroll to bottom
