@@ -1,147 +1,167 @@
+Here's a simplified, tidy chat interface that focuses on clean conversation flow with minimal design elements:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ALLChat</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      
-      body {
-        margin: 0;
-        background: #000;
-        color: #fff;
-        font-family: system-ui;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-      }
-      
-      header {
-        padding: 20px;
-        text-align: center;
-        background: #0b3d2e;
-        border-bottom: 1px solid #244;
-      }
-      
-      header h1 {
-        font-size: 2.2rem;
-        margin-bottom: 8px;
-      }
-      
-      header h2 {
-        font-size: 1.1rem;
-        opacity: 0.8;
-      }
-      
-      main {
-        flex: 1;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-      }
-      
-      footer {
-        padding: 15px;
-        text-align: center;
-        background: #0b3d2e;
-        border-top: 1px solid #244;
-        font-size: 0.9rem;
-        opacity: 0.7;
-      }
-      
-      textarea {
-        width: 100%;
-        height: 80px;
-        background: #000;
-        color: #fff;
-        border: 1px solid #333;
-        border-radius: 8px;
-        padding: 10px;
-        resize: none;
-      }
-      
-      button {
-        width: 100%;
-        padding: 10px 16px;
-        border: 1px solid #333;
-        background: #333;
-        color: #fff;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-      
-      button:hover {
-        background: #444;
-        transform: translateY(-1px);
-      }
-      
-      h3 {
-        margin-top: 5px;
-        margin-bottom: 10px;
-        font-size: 1.1rem;
-      }
-      
-      pre {
-        flex: 1;
-        white-space: pre-wrap;
-        background: #0b3d2e;
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid #244;
-        overflow: auto;
-        font-size: 1rem;
-      }
-      
-      #err {
-        color: #fecaca;
-        margin-top: 8px;
-        font-size: 0.9rem;
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>ALLChat</h1>
-      <h2>Ask any question about literacies or knowledge</h2>
-    </header>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ALLChat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: #000;
+      color: #fff;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    
+    header {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid #333;
+    }
+    
+    header h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.3rem;
+    }
+    
+    header p {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    
+    .chat-container {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      background: #0b3d2e;
+      border-radius: 8px;
+      margin: 0 1rem;
+    }
+    
+    #out {
+      white-space: pre-wrap;
+      padding: 1rem;
+    }
+    
+    .input-area {
+      display: flex;
+      padding: 0.5rem;
+      border-top: 1px solid #333;
+    }
+    
+    input {
+      flex: 1;
+      padding: 0.75rem;
+      background: #000;
+      color: #fff;
+      border: 1px solid #333;
+      border-radius: 4px;
+      margin-right: 0.5rem;
+      font-size: 1rem;
+    }
+    
+    button {
+      padding: 0.75rem 1.5rem;
+      background: #333;
+      color: #fff;
+      border: 1px solid #333;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    button:hover {
+      background: #444;
+    }
+    
+    footer {
+      padding: 0.5rem;
+      text-align: center;
+      border-top: 1px solid #333;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #000;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ALLChat</h1>
+    <p>Ask any question about literacies or knowledge</p>
+  </header>
 
-    <main>
-      <textarea id="input" placeholder="Type a message…"></textarea>
-      <button id="send">Send</button>
-      <h3>Reply</h3>
-      <pre id="out"></pre>
-      <div id="err" class="error" aria-live="polite"></div>
-    </main>
+  <div class="chat-container">
+    <pre id="out"></pre>
+  </div>
 
-    <footer>Designed by Dr Oscar Eybers 2025</footer>
+  <div class="input-area">
+    <input type="text" id="input" placeholder="Type your question here...">
+    <button id="send">Send</button>
+  </div>
 
-    <script>
-      const input = document.getElementById("input");
-      const out = document.getElementById("out");
-      const err = document.getElementById("err");
-      document.getElementById("send").addEventListener("click", async () => {
-        err.textContent = ""; out.textContent = "";
-        const content = input.value.trim(); if (!content) return;
-        try {
-          const res = await fetch("/api/chat", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ messages: [{ role: "user", content }] })
-          });
-          const text = await res.text();
-          if (!text) throw new Error(`Empty response (HTTP ${res.status})`);
-          let data; try { data = JSON.parse(text); } catch { throw new Error("Server did not return valid JSON"); }
-          if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
-          out.textContent = data?.choices?.[0]?.message?.content || JSON.stringify(data, null, 2);
-        } catch (e) { err.textContent = e.message; }
-      });
-    </script>
-  </body>
+  <footer>Designed by Dr Oscar Eybers 2025</footer>
+
+  <script>
+    const input = document.getElementById("input");
+    const out = document.getElementById("out");
+    document.getElementById("send").addEventListener("click", async () => {
+      const content = input.value.trim();
+      if (!content) return;
+      
+      // Add user message to chat
+      out.textContent += `\n\nYou: ${content}`;
+      input.value = '';
+      
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ messages: [{ role: "user", content }] })
+        });
+        
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const data = await res.json();
+        const reply = data?.choices?.[0]?.message?.content || "No response from server";
+        
+        // Add bot response to chat
+        out.textContent += `\n\nBot: ${reply}`;
+      } catch (e) {
+        out.textContent += `\n\nError: ${e.message}`;
+      }
+      
+      // Auto-scroll to bottom
+      const container = document.querySelector('.chat-container');
+      container.scrollTop = container.scrollHeight;
+    });
+    
+    // Enter key to send
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") document.getElementById("send").click();
+    });
+  </script>
+</body>
 </html>
