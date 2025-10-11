@@ -214,10 +214,10 @@
       border: 1px solid rgba(231, 76, 60, 0.2);
     }
     
-    /* Markdown styling - no symbols used */
+    /* Key concept styling - light blue for emphasized text */
     .section strong {
+      color: #5dade2; /* Light blue for key concepts */
       font-weight: 600;
-      color: #f5f5dc;
     }
     
     .section code {
@@ -335,6 +335,9 @@
         html += `<div class="section ${section.type}">${section.content}</div>`;
       }
       
+      // Process bold text (replace **text** with <strong>text</strong>)
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      
       return html;
     }
     
@@ -393,3 +396,4 @@
   </script>
 </body>
 </html>
+
