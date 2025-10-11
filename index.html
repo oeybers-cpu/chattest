@@ -240,6 +240,19 @@
       background: #333;
       border-radius: 4px;
     }
+    
+    /* Footer link styling */
+    .footer-link {
+      color: #3498db;
+      text-decoration: none;
+      transition: all 0.2s;
+      margin: 0 0.5rem;
+    }
+    
+    .footer-link:hover {
+      color: #fff;
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body>
@@ -260,7 +273,11 @@
     <button id="send">Send</button>
   </div>
 
-  <footer>Designed by Dr Oscar Eybers 2025</footer>
+  <footer>
+    <a href="#" class="footer-link">Top</a> | 
+    <a href="https://oeybers-cpu.github.io/a_lit_models/" class="footer-link">Home</a> | 
+    Designed by Dr Oscar Eybers 2025
+  </footer>
 
   <script>
     function escapeHTML(str) {
@@ -396,4 +413,4 @@
   </script>
 </body>
 </html>
-
+e links now have consistent styling with hover effects that match the design of other interactive elements on the page.
