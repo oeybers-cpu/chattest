@@ -178,16 +178,9 @@
     }
     
     /* Section styling - Modern Professional Design */
-    .section {
-      margin-bottom: 1.5em;
-      padding: 1.5rem;
-      border-radius: 10px;
-    }
-    
-    /* New heading style for response formatting */
     .section-heading {
-      color: #3498db;
-      margin-bottom: 0.8em;
+      color: #5dade2; /* Lighter blue heading color */
+      margin-bottom: 1.4em; /* Increased spacing below headings */
       font-family: 'Inter', sans-serif;
       font-size: 1.3em;
       font-weight: 600;
@@ -197,16 +190,21 @@
       padding-bottom: 0.5em;
     }
     
+    .message-content p {
+      margin-bottom: 1.2em; /* Increased paragraph spacing */
+      line-height: 1.6;
+    }
+    
     .section ul {
       list-style-type: none;
       padding-left: 0;
-      margin: 0.5em 0;
+      margin: 0.5em 0 1.2em 0; /* Increased bottom margin for lists */
     }
     
     .section li {
       position: relative;
       padding-left: 1.5em;
-      margin-bottom: 0.8em;
+      margin-bottom: 0.8em; /* Increased list item spacing */
       line-height: 1.6;
     }
     
@@ -214,7 +212,7 @@
       content: '•';
       position: absolute;
       left: 0;
-      color: #3498db;
+      color: #5dade2;
       font-size: 1.2em;
     }
     
@@ -435,7 +433,7 @@
         if (line.startsWith('**') && line.endsWith('**')) {
           // Remove the asterisks and wrap in strong with class
           const text = line.substring(2, line.length - 2);
-          html += `<strong class="section-heading">${text}</strong><br>`;
+          html += `<strong class="section-heading">${text}</strong>`;
           inList = false; // reset list context
         }
         // Check for list item
@@ -507,15 +505,21 @@
         heading.style.color = '#333';
         heading.style.borderBottom = '1px solid #eee';
         heading.style.paddingBottom = '0.5em';
-        heading.style.marginBottom = '0.8em';
+        heading.style.marginBottom = '1.4em'; // Match live styling
+      });
+      
+      clone.querySelectorAll('.message-content p').forEach(p => {
+        p.style.marginBottom = '1.2em'; // Match live styling
       });
       
       clone.querySelectorAll('.section ul').forEach(ul => {
         ul.style.paddingLeft = '1.5em';
         ul.style.listStyleType = 'disc';
+        ul.style.marginBottom = '1.2em'; // Match live styling
       });
+      
       clone.querySelectorAll('.section li').forEach(li => {
-        li.style.marginBottom = '0.5em';
+        li.style.marginBottom = '0.8em'; // Match live styling
       });
       
       clone.querySelectorAll('.section.blockquote').forEach(blockquote => {
