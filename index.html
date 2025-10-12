@@ -249,11 +249,25 @@
       fill: var(--light);
     }
 
-    .response-container {
+    .response-input-area {
       display: flex;
-      justify-content: center;
+      padding: 1rem;
+      gap: 0.5rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
       margin-top: 1rem;
       margin-bottom: 2rem;
+    }
+
+    .response-input-area input {
+      flex: 1;
+      margin-right: 0;
+    }
+
+    .response-send-btn {
+      white-space: nowrap;
     }
 
     ::-webkit-scrollbar {
@@ -302,6 +316,15 @@
         width: 100%;
         margin-bottom: 0.5rem;
         margin-right: 0;
+      }
+      
+      .response-input-area {
+        flex-direction: column;
+      }
+      
+      .response-send-btn {
+        width: 100%;
+        margin-top: 0.5rem;
       }
       
       .eyers-link, .response-button {
@@ -517,6 +540,9 @@
       
       const clone = chatContainer.cloneNode(true);
       
+      // Remove response input areas from PDF
+      clone.querySelectorAll('.response-input-area').forEach(el => el.remove());
+      
       clone.style.backgroundColor = 'white';
       clone.style.padding = '1rem';
       clone.style.fontFamily = 'Arial, sans-serif';
@@ -633,14 +659,29 @@
             <div class="card__title">ALLChat</div>
             <div class="message-content">${htmlResponse}</div>
           </div>
-          <div class="response-container">
-            <button class="response-button">Send another question</button>
+          <div class="response-input-area">
+            <input type="text" class="response-input" placeholder="Ask a follow-up question...">
+            <button class="response-send-btn eyers-link">Send</button>
           </div>`;
           
-        // Add event listener to the new response button
-        const responseButtons = document.querySelectorAll('.response-button');
-        responseButtons[responseButtons.length - 1].addEventListener('click', () => {
-          input.focus();
+        // Add event listeners to the new response input area
+        const responseInput = document.querySelector('.response-input:last-of-type');
+        const responseSendBtn = document.querySelector('.response-send-btn:last-of-type');
+        
+        responseSendBtn.addEventListener('click', () => {
+          const responseContent = responseInput.value.trim();
+          if (!responseContent) return;
+          
+          sendResponse(responseContent, responseInput, responseSendBtn);
+        });
+        
+        responseInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            const responseContent = responseInput.value.trim();
+            if (!responseContent) return;
+            
+            sendResponse(responseContent, responseInput, responseSendBtn);
+          }
         });
       } catch (e) {
         const escapedError = escapeHTML(e.message);
@@ -654,6 +695,83 @@
       const container = document.querySelector('.chat-container');
       container.scrollTop = container.scrollHeight;
     });
+    
+    function sendResponse(content, inputElement, buttonElement) {
+      // Disable the input and button while sending
+      inputElement.disabled = true;
+      buttonElement.disabled = true;
+      buttonElement.textContent = 'Sending...';
+      
+      const escapedUser = escapeHTML(content);
+      out.innerHTML += `
+        <div class="card user">
+          <div class="card__title">You</div>
+          <div class="message-content">${escapedUser}</div>
+        </div>`;
+      
+      // Remove the response input area
+      inputElement.parentElement.remove();
+      
+      // Simulate API call (replace with actual API call)
+      setTimeout(async () => {
+        try {
+          const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ messages: [{ role: "user", content }] })
+          });
+          
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          
+          const data = await res.json();
+          const reply = data?.choices?.[0]?.message?.content || "No response from server";
+          
+          const htmlResponse = markdownToHTML(reply);
+          out.innerHTML += `
+            <div class="card bot">
+              <div class="card__title">ALLChat</div>
+              <div class="message-content">${htmlResponse}</div>
+            </div>
+            <div class="response-input-area">
+              <input type="text" class="response-input" placeholder="Ask a follow-up question...">
+              <button class="response-send-btn eyers-link">Send</button>
+            </div>`;
+            
+          // Add event listeners to the new response input area
+          const newResponseInput = document.querySelector('.response-input:last-of-type');
+          const newResponseSendBtn = document.querySelector('.response-send-btn:last-of-type');
+          
+          newResponseSendBtn.addEventListener('click', () => {
+            const responseContent = newResponseInput.value.trim();
+            if (!responseContent) return;
+            
+            sendResponse(responseContent, newResponseInput, newResponseSendBtn);
+          });
+          
+          newResponseInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+              const responseContent = newResponseInput.value.trim();
+              if (!responseContent) return;
+              
+              sendResponse(responseContent, newResponseInput, newResponseSendBtn);
+            }
+          });
+          
+          // Focus the new input
+          newResponseInput.focus();
+        } catch (e) {
+          const escapedError = escapeHTML(e.message);
+          out.innerHTML += `
+            <div class="card error">
+              <div class="card__title">Error</div>
+              <div class="message-content">${escapedError}</div>
+            </div>`;
+        }
+        
+        const container = document.querySelector('.chat-container');
+        container.scrollTop = container.scrollHeight;
+      }, 500);
+    }
     
     input.addEventListener("keypress", (e) => {
       if (e.key === "Enter") sendButton.click();
