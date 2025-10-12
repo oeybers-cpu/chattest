@@ -355,6 +355,11 @@
       .footer-right a {
         margin: 0.25rem 0;
       }
+      
+      /* Hide Top and Home links on mobile */
+      .footer-left .desktop-only {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -384,9 +389,9 @@
 
   <footer class="card__footer">
     <div class="footer-left">
-      <a href="#" class="eyers-link">Top</a>
-      <span class="separator"> | </span>
-      <a href="https://oeybers-cpu.github.io/a_lit_models/" class="eyers-link">Home</a>
+      <a href="#" class="eyers-link desktop-only">Top</a>
+      <span class="separator desktop-only"> | </span>
+      <a href="https://oeybers-cpu.github.io/a_lit_models/" class="eyers-link desktop-only">Home</a>
       <span class="separator"> | </span>
       <span>Designed by Dr Oscar Eybers 2025</span>
     </div>
