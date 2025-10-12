@@ -10,7 +10,7 @@
     :root {
       --primary: #3a86ff;
       --secondary: #4361ee;
-      --accent: #7209b7; /* Purple for main tab */
+      --accent: #7209b7;
       --dark: #0f1419;
       --darker: #0a0d10;
       --light: #f8f9fa;
@@ -67,7 +67,7 @@
       color: var(--text-gray);
     }
 
-    /* Main header tab - Purple style */
+    /* Main header tab - Purple style for "Academic Literacy Hub" */
     .academic-hub-link {
       display: inline-block;
       padding: 0.75rem 1.5rem;
@@ -88,6 +88,26 @@
       color: var(--light);
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(114, 9, 183, 0.3);
+    }
+
+    /* All other tabs - Blue style like Eybers Articles/Chapters */
+    .eyers-link, .allchat-header-tab, .eybers-footer-link {
+      color: var(--light);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(58, 134, 255, 0.1);
+      border: 1px solid rgba(58, 134, 255, 0.3);
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .eyers-link:hover, .allchat-header-tab:hover, .eybers-footer-link:hover {
+      background: rgba(58, 134, 255, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(58, 134, 255, 0.2);
     }
 
     .card {
@@ -129,25 +149,6 @@
       margin: 1.5em 0;
       font-style: italic;
       border-radius: 0 var(--border-radius) var(--border-radius) 0;
-    }
-
-    /* Secondary tabs - Blue style */
-    .eyers-link, .allchat-header-tab, .eybers-footer-link {
-      color: var(--light);
-      background: rgba(58, 134, 255, 0.1);
-      border: 1px solid rgba(58, 134, 255, 0.3);
-      transition: all 0.3s ease;
-      white-space: nowrap;
-      font-weight: 500;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.9rem;
-    }
-
-    .eyers-link:hover, .allchat-header-tab:hover, .eybers-footer-link:hover {
-      background: rgba(58, 134, 255, 0.2);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(58, 134, 255, 0.2);
     }
 
     .card__footer {
