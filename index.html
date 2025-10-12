@@ -10,7 +10,7 @@
     :root {
       --primary: #3a86ff;
       --secondary: #4361ee;
-      --accent: #7209b7;
+      --accent: #FF8C00; /* Dark orange */
       --dark: #0f1419;
       --darker: #0a0d10;
       --light: #f8f9fa;
@@ -70,23 +70,23 @@
     .academic-hub-link {
       display: inline-block;
       padding: 0.75rem 1.5rem;
-      background: transparent;
-      border: 1px solid var(--royal-blue);
-      color: var(--royal-blue);
+      background: var(--accent);
+      border: 1px solid rgba(255, 140, 0, 0.5);
+      color: white;
       border-radius: var(--border-radius);
       text-decoration: none;
       font-family: 'Inter', sans-serif;
-      font-weight: 500;
+      font-weight: 600;
       transition: all 0.3s;
       margin-top: 0.5rem;
       font-size: 0.95rem;
     }
 
     .academic-hub-link:hover {
-      background: var(--royal-blue);
+      background: #E37A00;
       color: var(--light);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+      box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
     }
 
     .card {
@@ -130,56 +130,24 @@
       border-radius: 0 var(--border-radius) var(--border-radius) 0;
     }
 
-    .eyers-link, .allchat-header-tab {
-      background: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--light);
-      font-weight: 500;
-      padding: 0.75rem 1.5rem;
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      transition: all 0.3s;
-      font-family: 'Inter', sans-serif;
-      min-width: auto;
-      text-align: center;
-      line-height: 1.2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 0.95rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .eyers-link:hover, .allchat-header-tab:hover {
-      background: var(--royal-blue);
-      color: var(--light);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
-    }
-
-    /* Footer buttons style - purple digital border */
-    .footer-left a.eyers-link, 
-    .footer-right a.eyers-link {
-      background: var(--accent);
-      border: 1px solid rgba(114, 9, 183, 0.5);
+    /* All tabs now use the dark orange style */
+    .eyers-link, .allchat-header-tab, .eybers-footer-link {
       color: white;
-      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.9rem;
       padding: 6px 12px;
       border-radius: 6px;
-      font-size: 0.9rem;
+      background: var(--accent);
+      border: 1px solid rgba(255, 140, 0, 0.5);
+      transition: all 0.3s ease;
+      font-weight: 600;
       white-space: nowrap;
-      box-shadow: none;
-      display: inline-block;
-      text-align: center;
-      line-height: 1.2;
-      margin: 0;
     }
 
-    .footer-left a.eyers-link:hover, 
-    .footer-right a.eyers-link:hover {
-      background: #5a08a0;
+    .eyers-link:hover, .allchat-header-tab:hover, .eybers-footer-link:hover {
+      background: #E37A00;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(114, 9, 183, 0.3);
+      box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
     }
 
     .card__footer {
