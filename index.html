@@ -28,12 +28,6 @@
       --code-bg: rgba(50, 60, 80, 0.8);
     }
 
-    .grid-lines {
-      background-image: 
-        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    }
-
     body {
       background: var(--dark);
       color: var(--light);
@@ -161,6 +155,31 @@
       color: var(--light);
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+    }
+
+    /* Footer buttons style - purple digital border */
+    .footer-left a.eyers-link, 
+    .footer-right a.eyers-link {
+      background: var(--accent);
+      border: 1px solid rgba(114, 9, 183, 0.5);
+      color: white;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      box-shadow: none;
+      display: inline-block;
+      text-align: center;
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    .footer-left a.eyers-link:hover, 
+    .footer-right a.eyers-link:hover {
+      background: #5a08a0;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(114, 9, 183, 0.3);
     }
 
     .card__footer {
@@ -351,7 +370,7 @@
     }
   </style>
 </head>
-<body class="grid-lines">
+<body>
   <header class="top-header">
     <div class="header-left">
       <h1>ALLChat</h1>
