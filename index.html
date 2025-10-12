@@ -8,299 +8,346 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     :root {
-        --primary: #ffffff;
-        --secondary: #f8f9fa;
-        --accent: #e9ecef;
-        --dark: #000000;
-        --darker: #0a0a0a;
-        --light: #ffffff;
-        --card-bg: rgba(255, 255, 255, 0.95);
-        --text-gray: #6c757d;
-        --border-color: #dee2e6;
-        --card-padding: 20px;
-        --card-gap: 20px;
-        --border-radius: 8px;
-        --top-header-height: 70px;
+      --primary: #3a86ff;
+      --secondary: #4361ee;
+      --accent: #7209b7;
+      --dark: #0f1419;
+      --darker: #0a0d10;
+      --light: #f8f9fa;
+      --card-bg: rgba(25, 30, 40, 0.8);
+      --lighter-accent: #90e0ef;
+      --royal-blue: #4361ee;
+      --royal-blue-light: #4895ef;
+      --text-gray: #adb5bd;
+      --card-padding: 25px;
+      --card-gap: 30px;
+      --border-radius: 12px;
+      --top-header-height: 80px;
+      --digital-purple: #7209b7;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --code-bg: rgba(50, 60, 80, 0.8);
     }
 
     .grid-lines {
-        background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
     }
 
     body {
-        background: var(--dark);
-        color: var(--light);
-        font-family: 'Inter', sans-serif;
-        line-height: 1.5;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+      background: var(--dark);
+      color: var(--light);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     .top-header {
-        background: var(--darker);
-        border-bottom: 1px solid var(--border-color);
-        backdrop-filter: none;
-        padding: 1rem;
-        text-align: center;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
+      background: var(--darker);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.5rem;
+      text-align: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      height: var(--top-header-height);
     }
 
     .top-header h1 {
-        color: var(--light);
-        text-transform: none;
-        letter-spacing: normal;
-        font-family: 'Ubuntu', sans-serif;
-        font-size: 1.5rem;
-        margin-bottom: 0.3rem;
+      color: var(--royal-blue);
+      font-family: 'Ubuntu', sans-serif;
+      font-size: 1.8rem;
+      margin-bottom: 0.3rem;
+      letter-spacing: 0.5px;
     }
 
     .top-header p {
-        font-size: 0.9rem;
-        opacity: 0.8;
-        color: var(--text-gray);
+      font-size: 0.9rem;
+      opacity: 0.8;
+      color: var(--text-gray);
     }
 
     .academic-hub-link {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        background: transparent;
-        border: 1px solid var(--border-color);
-        color: var(--light);
-        border-radius: var(--border-radius);
-        text-decoration: none;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.9rem;
-        transition: all 0.2s;
-        margin-top: 0.5rem;
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: 1px solid var(--royal-blue);
+      color: var(--royal-blue);
+      border-radius: var(--border-radius);
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      transition: all 0.3s;
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
     }
 
     .academic-hub-link:hover {
-        background: var(--card-bg);
-        color: var(--dark);
-        transform: translateY(-1px);
+      background: var(--royal-blue);
+      color: var(--light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
     }
 
     .card {
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: var(--border-radius);
-        color: var(--dark);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        transition: all 0.2s ease;
-        margin-bottom: 1.5rem;
-        padding: 1.5rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      color: var(--light);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      margin-bottom: 2rem;
+      padding: var(--card-padding);
     }
 
     .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
     }
 
     .card__title {
-        color: var(--dark);
-        font-weight: 600;
+      font-weight: 600;
+      margin-bottom: 1.2em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .user .card__title {
+      color: var(--royal-blue);
+    }
+
+    .bot .card__title {
+      color: var(--digital-purple);
     }
 
     .card__quote {
-        background: var(--accent);
-        color: var(--dark);
-        border-left: 4px solid var(--dark);
-        border: 1px solid var(--border-color);
-        padding: 1em;
-        margin: 1em 0;
-        font-style: italic;
-        border-radius: 0 4px 4px 0;
+      background: rgba(25, 30, 40, 0.9);
+      border-left: 4px solid var(--royal-blue);
+      padding: 1.25em;
+      margin: 1.5em 0;
+      font-style: italic;
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
     }
 
     .eyers-link, .allchat-header-tab {
-        background: transparent;
-        border: 1px solid var(--border-color);
-        color: var(--light);
-        font-weight: 500;
-        padding: 0.5rem 1rem;
-        border-radius: var(--border-radius);
-        cursor: pointer;
-        transition: all 0.2s;
-        font-family: 'Inter', sans-serif;
-        min-width: auto;
-        text-align: center;
-        line-height: 1.2;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 0.85rem;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--light);
+      font-weight: 500;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'Inter', sans-serif;
+      min-width: auto;
+      text-align: center;
+      line-height: 1.2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.95rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .eyers-link:hover, .allchat-header-tab:hover {
-        background: var(--card-bg);
-        color: var(--dark);
-        transform: translateY(-1px);
+      background: var(--royal-blue);
+      color: var(--light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
     }
 
     .card__footer {
-        background: var(--accent);
-        color: var(--dark);
-        border-top: 1px solid var(--border-color);
-        padding: 0.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 0.9rem;
+      background: var(--darker);
+      border-top: 1px solid var(--border-color);
+      padding: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
     }
 
     .card p {
-        color: var(--dark);
-        line-height: 1.6;
-        margin-bottom: 1.2em;
+      line-height: 1.7;
+      margin-bottom: 1.2em;
+      color: var(--light);
     }
 
     .card ul {
-        list-style-type: none;
-        padding-left: 0;
-        margin: 0.5em 0 1.2em 0;
+      list-style-type: none;
+      padding-left: 0;
+      margin: 0.5em 0 1.5em 0;
     }
 
     .card li {
-        position: relative;
-        padding-left: 1.5em;
-        margin-bottom: 0.8em;
-        line-height: 1.6;
+      position: relative;
+      padding-left: 1.5em;
+      margin-bottom: 0.8em;
+      line-height: 1.6;
     }
 
     .card li::before {
-        content: '•';
-        position: absolute;
-        left: 0;
-        color: var(--dark);
-        font-size: 1.2em;
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--royal-blue);
+      font-size: 1.2em;
     }
 
-    /* FIX: Changed section-title color to var(--dark) for visibility on white backgrounds */
     .section-title {
-        color: var(--dark);
-        border-bottom: 1px solid var(--border-color);
-        font-weight: 600;
-        margin-bottom: 1.4em;
-        padding-bottom: 0.5em;
+      color: var(--royal-blue);
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 600;
+      margin-bottom: 1.4em;
+      padding-bottom: 0.5em;
     }
 
     input {
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        color: var(--dark);
-        border-radius: var(--border-radius);
-        padding: 0.75rem;
-        font-size: 1rem;
-        font-family: 'Inter', sans-serif;
-        flex: 1;
-        margin-right: 0.5rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--light);
+      border-radius: var(--border-radius);
+      padding: 1rem;
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+      flex: 1;
+      margin-right: 0.5rem;
+      transition: all 0.3s;
+    }
+
+    input:focus {
+      border-color: var(--royal-blue);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
     }
 
     .input-area {
-        display: flex;
-        padding: 0.5rem;
-        border-top: 1px solid var(--border-color);
-        gap: 0.3rem;
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: var(--border-radius);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        margin: 0 1rem;
-        margin-bottom: 1rem;
+      display: flex;
+      padding: 1rem;
+      border-top: 1px solid var(--border-color);
+      gap: 0.5rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      margin: 0 1rem;
+      margin-bottom: 1.5rem;
     }
 
     .chat-container {
-        flex: 1;
-        padding: 1rem;
-        overflow-y: auto;
-        background: var(--dark);
-        border-radius: var(--border-radius);
-        margin: 0 1rem;
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      background: var(--dark);
+      border-radius: var(--border-radius);
+      margin: 0 1rem;
     }
 
     .pdf-download-btn {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 0.2rem;
-        min-width: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.4rem;
+      min-width: 40px;
+    }
+
+    .pdf-download-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--light);
     }
 
     ::-webkit-scrollbar {
-        width: 8px;
+      width: 10px;
     }
 
     ::-webkit-scrollbar-track {
-        background: var(--dark);
+      background: var(--dark);
     }
 
     ::-webkit-scrollbar-thumb {
-        background: var(--border-color);
-        border-radius: 4px;
+      background: var(--royal-blue);
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--royal-blue-light);
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      border: 1px solid var(--border-color);
+      color: var(--lighter-accent);
     }
 
     @media (max-width: 768px) {
-        .chat-container {
-            max-height: calc(100vh - 14rem);
-            margin: 0 1rem;
-            overflow-y: auto;
-        }
-        
-        .input-area {
-            display: flex;
-            flex-direction: column;
-            padding: 0.5rem;
-            border-top: 1px solid var(--border-color);
-            gap: 0.2rem;
-            margin-bottom: 1rem;
-        }
-        
-        input {
-            width: 100%;
-            margin-bottom: 0.2rem;
-        }
-        
-        .eyers-link {
-            width: 100%;
-            padding: 0.3rem 0.6rem;
-            font-size: 0.9rem;
-            min-width: auto;
-        }
-        
-        .pdf-download-btn svg {
-            width: 14px;
-            height: 14px;
-        }
-        
-        .top-header {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding: 1rem;
-        }
-        
-        .academic-hub-link {
-            display: block;
-            margin: 0.5rem auto;
-            width: fit-content;
-        }
-        
-        .footer-left {
-            margin-bottom: 0.5rem;
-        }
-        
-        .footer-right {
-            margin-top: 0.5rem;
-        }
+      .chat-container {
+        max-height: calc(100vh - 14rem);
+        margin: 0 1rem;
+        overflow-y: auto;
+      }
+      
+      .input-area {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      input {
+        width: 100%;
+        margin-bottom: 0;
+      }
+      
+      .eyers-link {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        font-size: 1rem;
+        min-width: auto;
+      }
+      
+      .pdf-download-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+      
+      .top-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1.5rem;
+        height: auto;
+      }
+      
+      .academic-hub-link {
+        display: block;
+        margin: 0.8rem auto;
+        width: fit-content;
+      }
+      
+      .card__footer {
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+      
+      .footer-left {
+        margin-bottom: 0.5rem;
+      }
+      
+      .footer-right {
+        margin-top: 0.5rem;
+      }
     }
   </style>
 </head>
