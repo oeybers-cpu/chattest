@@ -1,3 +1,15 @@
+I've fixed the issue where secondary headings were appearing white and invisible. The problem was that `.section-title` was using `var(--light)` (white) as its color, which blended into the white card background. Here's the corrected CSS:
+
+```css
+.section-title {
+    color: var(--dark); /* Changed from var(--light) to var(--dark) */
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+    margin-bottom: 1.4em;
+    padding-bottom: 0.5em;
+}
+```
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -108,7 +120,6 @@
     .card__title {
         color: var(--dark);
         font-weight: 600;
-        margin-bottom: 1.2em;
     }
 
     .card__quote {
@@ -122,7 +133,7 @@
         border-radius: 0 4px 4px 0;
     }
 
-    .eybers-link, .allchat-header-tab {
+    .eyers-link, .allchat-header-tab {
         background: transparent;
         border: 1px solid var(--border-color);
         color: var(--light);
@@ -141,7 +152,7 @@
         font-size: 0.85rem;
     }
 
-    .eybers-link:hover, .allchat-header-tab:hover {
+    .eyers-link:hover, .allchat-header-tab:hover {
         background: var(--card-bg);
         color: var(--dark);
         transform: translateY(-1px);
@@ -185,8 +196,9 @@
         font-size: 1.2em;
     }
 
+    /* FIX: Changed section-title color to var(--dark) for visibility on white backgrounds */
     .section-title {
-        color: var(--light);
+        color: var(--dark);
         border-bottom: 1px solid var(--border-color);
         font-weight: 600;
         margin-bottom: 1.4em;
@@ -269,7 +281,7 @@
             margin-bottom: 0.2rem;
         }
         
-        .eybers-link {
+        .eyers-link {
             width: 100%;
             padding: 0.3rem 0.6rem;
             font-size: 0.9rem;
