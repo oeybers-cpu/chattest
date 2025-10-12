@@ -323,15 +323,37 @@
       
       .card__footer {
         flex-direction: column;
+        align-items: center;
+        text-align: center;
         gap: 0.8rem;
+        width: 100%;
+        padding: 1rem;
       }
       
       .footer-left {
-        margin-bottom: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      
+      .footer-left a {
+        margin: 0.25rem 0;
+      }
+      
+      .footer-left .separator {
+        display: none;
       }
       
       .footer-right {
-        margin-top: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      
+      .footer-right a {
+        margin: 0.25rem 0;
       }
     }
   </style>
@@ -362,9 +384,11 @@
 
   <footer class="card__footer">
     <div class="footer-left">
-      <a href="#" class="eyers-link">Top</a> | 
-      <a href="https://oeybers-cpu.github.io/a_lit_models/" class="eyers-link">Home</a> | 
-      Designed by Dr Oscar Eybers 2025
+      <a href="#" class="eyers-link">Top</a>
+      <span class="separator"> | </span>
+      <a href="https://oeybers-cpu.github.io/a_lit_models/" class="eyers-link">Home</a>
+      <span class="separator"> | </span>
+      <span>Designed by Dr Oscar Eybers 2025</span>
     </div>
     <div class="footer-right">
       <a href="https://www.free-counters.org/" class="eyers-link">... by Free-Counters.org</a>
