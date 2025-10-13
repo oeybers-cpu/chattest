@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ALLChat</title>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js  "></script>
   <style>
     :root {
       --primary: #3a86ff;
@@ -250,24 +250,7 @@
     }
 
     .response-input-area {
-      display: flex;
-      padding: 1rem;
-      gap: 0.5rem;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: var(--border-radius);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-      margin-top: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .response-input-area input {
-      flex: 1;
-      margin-right: 0;
-    }
-
-    .response-send-btn {
-      white-space: nowrap;
+      display: none; /* Hide response input areas */
     }
 
     ::-webkit-scrollbar {
@@ -415,7 +398,7 @@
       <h1>ALLChat</h1>
       <p>Ask any question about literacies or knowledge</p>
     </div>
-    <a href="https://oeybers-cpu.github.io/a_lit_models/" class="academic-hub-link">Academic Literacy Hub</a>
+    <a href="https://oeybers-cpu.github.io/a_lit_models/  " class="academic-hub-link">Academic Literacy Hub</a>
   </header>
 
   <div class="chat-container">
@@ -439,14 +422,14 @@
     <div class="footer-left">
       <a href="#" class="eyers-link desktop-only">Top</a>
       <span class="separator desktop-only"> | </span>
-      <a href="https://oeybers-cpu.github.io/a_lit_models/" class="eyers-link desktop-only">Home</a>
+      <a href="https://oeybers-cpu.github.io/a_lit_models/  " class="eyers-link desktop-only">Home</a>
       <span class="separator"> | </span>
       <span>Designed by Dr Oscar Eybers 2025</span>
     </div>
     <div class="footer-right">
-      <a href="https://www.free-counters.org/" class="eyers-link">... by Free-Counters.org</a>
+      <a href="https://www.free-counters.org/  " class="eyers-link">... by Free-Counters.org</a>
       <script type="text/javascript" src="https://www.freevisitorcounters.com/auth.php?id=e6296ca96d429e4da4d7339220ad2b44b6e86672"></script>
-      <script type="text/javascript" src="https://www.freevisitorcounters.com/en/home/counter/1405736/t/3"></script>
+      <script type="text/javascript" src="https://www.freevisitorcounters.com/en/home/counter/1405736/t/3  "></script>
     </div>
   </footer>
 
@@ -658,31 +641,10 @@
           <div class="card bot">
             <div class="card__title">ALLChat</div>
             <div class="message-content">${htmlResponse}</div>
-          </div>
-          <div class="response-input-area">
-            <input type="text" class="response-input" placeholder="Ask a follow-up question...">
-            <button class="response-send-btn eyers-link">Send</button>
           </div>`;
           
-        // Add event listeners to the new response input area
-        const responseInput = document.querySelector('.response-input:last-of-type');
-        const responseSendBtn = document.querySelector('.response-send-btn:last-of-type');
-        
-        responseSendBtn.addEventListener('click', () => {
-          const responseContent = responseInput.value.trim();
-          if (!responseContent) return;
-          
-          sendResponse(responseContent, responseInput, responseSendBtn);
-        });
-        
-        responseInput.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            const responseContent = responseInput.value.trim();
-            if (!responseContent) return;
-            
-            sendResponse(responseContent, responseInput, responseSendBtn);
-          }
-        });
+        // Focus back on the main input after receiving response
+        input.focus();
       } catch (e) {
         const escapedError = escapeHTML(e.message);
         out.innerHTML += `
@@ -695,83 +657,6 @@
       const container = document.querySelector('.chat-container');
       container.scrollTop = container.scrollHeight;
     });
-    
-    function sendResponse(content, inputElement, buttonElement) {
-      // Disable the input and button while sending
-      inputElement.disabled = true;
-      buttonElement.disabled = true;
-      buttonElement.textContent = 'Sending...';
-      
-      const escapedUser = escapeHTML(content);
-      out.innerHTML += `
-        <div class="card user">
-          <div class="card__title">You</div>
-          <div class="message-content">${escapedUser}</div>
-        </div>`;
-      
-      // Remove the response input area
-      inputElement.parentElement.remove();
-      
-      // Simulate API call (replace with actual API call)
-      setTimeout(async () => {
-        try {
-          const res = await fetch("/api/chat", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ messages: [{ role: "user", content }] })
-          });
-          
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          
-          const data = await res.json();
-          const reply = data?.choices?.[0]?.message?.content || "No response from server";
-          
-          const htmlResponse = markdownToHTML(reply);
-          out.innerHTML += `
-            <div class="card bot">
-              <div class="card__title">ALLChat</div>
-              <div class="message-content">${htmlResponse}</div>
-            </div>
-            <div class="response-input-area">
-              <input type="text" class="response-input" placeholder="Ask a follow-up question...">
-              <button class="response-send-btn eyers-link">Send</button>
-            </div>`;
-            
-          // Add event listeners to the new response input area
-          const newResponseInput = document.querySelector('.response-input:last-of-type');
-          const newResponseSendBtn = document.querySelector('.response-send-btn:last-of-type');
-          
-          newResponseSendBtn.addEventListener('click', () => {
-            const responseContent = newResponseInput.value.trim();
-            if (!responseContent) return;
-            
-            sendResponse(responseContent, newResponseInput, newResponseSendBtn);
-          });
-          
-          newResponseInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-              const responseContent = newResponseInput.value.trim();
-              if (!responseContent) return;
-              
-              sendResponse(responseContent, newResponseInput, newResponseSendBtn);
-            }
-          });
-          
-          // Focus the new input
-          newResponseInput.focus();
-        } catch (e) {
-          const escapedError = escapeHTML(e.message);
-          out.innerHTML += `
-            <div class="card error">
-              <div class="card__title">Error</div>
-              <div class="message-content">${escapedError}</div>
-            </div>`;
-        }
-        
-        const container = document.querySelector('.chat-container');
-        container.scrollTop = container.scrollHeight;
-      }, 500);
-    }
     
     input.addEventListener("keypress", (e) => {
       if (e.key === "Enter") sendButton.click();
