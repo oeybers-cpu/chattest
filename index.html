@@ -41,21 +41,106 @@
       box-sizing: border-box;
     }
 
-    /* --- ADD THIS NEW STYLE FOR THE TYPING INDICATOR --- */
+    /* Improved typing indicator */
     .pulsing-cursor {
         display: inline-block;
         width: 10px;
-        height: 1.5em; /* Match font height */
+        height: 1.5em;
         background-color: var(--light);
         border-radius: 2px;
         animation: pulse 1s infinite;
         vertical-align: text-bottom;
+        margin-left: 4px;
     }
     @keyframes pulse {
         0%, 100% { opacity: 1; }
         50% { opacity: 0; }
     }
-    /* --- (All your other styles remain the same) --- */
+
+    /* Smooth transition for content updates */
+    .message-content {
+      transition: opacity 0.3s ease;
+    }
+
+    .message-content.updating {
+      opacity: 0.7;
+    }
+
+    /* Better formatting for code blocks */
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .code-block code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: var(--lighter-accent);
+    }
+
+    /* Improved list styling */
+    .card ul, .card ol {
+      margin: 1rem 0;
+      padding-left: 1.5rem;
+    }
+
+    .card ul li, .card ol li {
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+
+    .card ul li::before {
+      content: '•';
+      color: var(--royal-blue);
+      font-weight: bold;
+      display: inline-block;
+      width: 1em;
+      margin-left: -1em;
+    }
+
+    .card ol {
+      counter-reset: list-counter;
+    }
+
+    .card ol li {
+      counter-increment: list-counter;
+    }
+
+    .card ol li::before {
+      content: counter(list-counter) '.';
+      color: var(--royal-blue);
+      font-weight: bold;
+      display: inline-block;
+      width: 1.5em;
+      margin-left: -1.5em;
+    }
+
+    /* Table styling */
+    .card table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    .card table th, .card table td {
+      border: 1px solid var(--border-color);
+      padding: 0.5rem;
+      text-align: left;
+    }
+
+    .card table th {
+      background: rgba(58, 134, 255, 0.1);
+      color: var(--royal-blue);
+      font-weight: 600;
+    }
 
     .top-header {
       background: var(--darker);
@@ -264,7 +349,7 @@
     }
 
     .response-input-area {
-      display: none; /* Hide response input areas */
+      display: none;
     }
 
     ::-webkit-scrollbar {
@@ -288,7 +373,7 @@
       background: var(--code-bg);
       padding: 0.2em 0.4em;
       border-radius: 4px;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Courier New', monospace;
       border: 1px solid var(--border-color);
       color: var(--lighter-accent);
     }
@@ -445,11 +530,8 @@
     </div>
   </footer>
 
-  <!-- ================================================================= -->
-  <!-- ==================== REVISED SCRIPT SECTION ===================== -->
-  <!-- ================================================================= -->
   <script>
-    // Helper functions for formatting text
+    // Enhanced helper functions for formatting text
     function escapeHTML(str) {
       return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
     }
@@ -458,31 +540,72 @@
       text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
       text = text.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
       text = text.replace(/\*([^\*]+)\*/g, '<em>$1</em>');
+      text = text.replace(/~~([^~]+)~~/g, '<del>$1</del>');
       return text;
     }
 
     function markdownToHTML(markdown) {
       let html = '';
       let inList = false;
+      let inOrderedList = false;
+      let inCodeBlock = false;
+      let codeBlockContent = '';
+      let codeLanguage = '';
+      
       const lines = markdown.split('\n');
+      
       for (let i = 0; i < lines.length; i++) {
         let line = lines[i].trim();
-        if (inList && !line.startsWith('- ')) {
+        
+        // Handle code blocks
+        if (line.startsWith('```')) {
+          if (!inCodeBlock) {
+            // Start of code block
+            inCodeBlock = true;
+            codeLanguage = line.substring(3).trim();
+            codeBlockContent = '';
+            continue;
+          } else {
+            // End of code block
+            inCodeBlock = false;
+            html += `<div class="code-block">${escapeHTML(codeBlockContent)}</div>`;
+            continue;
+          }
+        }
+        
+        if (inCodeBlock) {
+          codeBlockContent += line + '\n';
+          continue;
+        }
+        
+        // Close any open lists
+        if (inList && !line.startsWith('- ') && !line.startsWith('* ')) {
           html += '</ul>';
           inList = false;
         }
+        
+        if (inOrderedList && !/^\d+\.\s/.test(line)) {
+          html += '</ol>';
+          inOrderedList = false;
+        }
+        
         const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
         if (headingMatch) {
+          const level = headingMatch[1].length;
           const text = processInline(headingMatch[2]);
-          html += `<strong class="section-title">${text}</strong>`;
+          html += `<h${level} class="section-title">${text}</h${level}>`;
           continue;
         }
+        
+        // Bold section titles (alternative format)
         if (line.startsWith('**') && line.endsWith('**') && line.length > 4) {
           const text = processInline(line.substring(2, line.length - 2));
           html += `<strong class="section-title">${text}</strong>`;
           continue;
         }
-        if (line.startsWith('- ')) {
+        
+        // Unordered lists
+        if (line.startsWith('- ') || line.startsWith('* ')) {
           if (!inList) {
             html += '<ul>';
             inList = true;
@@ -491,6 +614,19 @@
           html += `<li>${text}</li>`;
           continue;
         }
+        
+        // Ordered lists
+        if (/^\d+\.\s/.test(line)) {
+          if (!inOrderedList) {
+            html += '<ol>';
+            inOrderedList = true;
+          }
+          const text = processInline(line.replace(/^\d+\.\s/, ''));
+          html += `<li>${text}</li>`;
+          continue;
+        }
+        
+        // Blockquotes
         if (line.startsWith('>')) {
           let blockquoteContent = processInline(line.substring(1).trim());
           while (i + 1 < lines.length && lines[i + 1].trim().startsWith('>')) {
@@ -500,15 +636,74 @@
           html += `<div class="card__quote"><p>${blockquoteContent}</p></div>`;
           continue;
         }
+        
+        // Tables (basic support)
+        if (line.includes('|') && line.split('|').length > 2) {
+          const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
+          if (cells.length > 1) {
+            // Check if this is a header separator
+            if (cells.every(cell => /^:?-+:?$/.test(cell))) {
+              continue; // Skip separator rows in rendering
+            }
+            
+            html += '<table><tr>';
+            for (const cell of cells) {
+              // Check if previous line was a header
+              if (i > 0 && lines[i-1].includes('|')) {
+                const prevCells = lines[i-1].split('|').map(c => c.trim()).filter(c => c);
+                if (prevCells.length === cells.length && !prevCells.every(c => /^:?-+:?$/.test(c))) {
+                  // This is the first data row, need to add header from previous line
+                  html = html.replace('<table>', '<table><thead><tr>');
+                  for (const headerCell of prevCells) {
+                    html += `<th>${processInline(headerCell)}</th>`;
+                  }
+                  html += '</tr></thead><tbody><tr>';
+                  // Process current row as data
+                  for (const dataCell of cells) {
+                    html += `<td>${processInline(dataCell)}</td>`;
+                  }
+                  html += '</tr>';
+                  continue;
+                }
+              }
+              html += `<td>${processInline(cell)}</td>`;
+            }
+            html += '</tr></table>';
+            continue;
+          }
+        }
+        
+        // Empty lines
         if (line === '') {
+          // Add paragraph break but don't create empty paragraphs
+          if (html.trim() !== '' && !html.endsWith('</p>')) {
+            html += '<p><br></p>';
+          }
           continue;
         }
+        
+        // Regular paragraphs
         const text = processInline(line);
-        html += `<p>${text}</p>`;
+        
+        // Check if we're continuing a paragraph or starting a new one
+        if (html.endsWith('</p>')) {
+          html += `<p>${text}</p>`;
+        } else if (html.trim() === '' || html.endsWith('</ul>') || html.endsWith('</ol>') || 
+                   html.endsWith('</table>') || html.endsWith('</h1>') || html.endsWith('</h2>') || 
+                   html.endsWith('</h3>') || html.endsWith('</h4>') || html.endsWith('</h5>') || 
+                   html.endsWith('</h6>') || html.endsWith('</div>')) {
+          html += `<p>${text}</p>`;
+        } else {
+          // Continue the current paragraph
+          html = html.replace(/(<p>.*?)(<\/p>)$/, `$1 ${text}$2`);
+        }
       }
-      if (inList) {
-        html += '</ul>';
-      }
+      
+      // Close any remaining open tags
+      if (inList) html += '</ul>';
+      if (inOrderedList) html += '</ol>';
+      if (inCodeBlock) html += `<div class="code-block">${escapeHTML(codeBlockContent)}</div>`;
+      
       return html;
     }
     
@@ -519,7 +714,7 @@
     const downloadPDFButton = document.getElementById("download-pdf");
     const chatContainer = document.querySelector('.chat-container');
 
-    // PDF Download Logic (remains the same)
+    // PDF Download Logic
     downloadPDFButton.addEventListener('click', () => {
       const clone = chatContainer.cloneNode(true);
       clone.querySelectorAll('.response-input-area').forEach(el => el.remove());
@@ -572,6 +767,15 @@
         code.style.borderRadius = '4px';
         code.style.border = '1px solid #ddd';
       });
+      clone.querySelectorAll('.code-block').forEach(codeBlock => {
+        codeBlock.style.background = '#f5f5f5';
+        codeBlock.style.padding = '1rem';
+        codeBlock.style.borderRadius = '4px';
+        codeBlock.style.border = '1px solid #ddd';
+        codeBlock.style.overflowX = 'auto';
+        codeBlock.style.fontFamily = 'Courier New, monospace';
+        codeBlock.style.fontSize = '0.9rem';
+      });
       clone.querySelectorAll('.card__title').forEach(header => {
         header.style.color = '#333';
         header.style.fontWeight = 'bold';
@@ -591,7 +795,7 @@
       html2pdf().from(clone).set(opt).save();
     });
     
-    // --- REVISED SEND FUNCTION WITH STREAMING ---
+    // Enhanced streaming function with better coherence
     async function handleSend() {
       const userContent = input.value.trim();
       if (!userContent) return;
@@ -606,7 +810,7 @@
       input.value = '';
       chatContainer.scrollTop = chatContainer.scrollHeight;
 
-      // 2. Create a placeholder for the bot's response
+      // 2. Create a placeholder for the bot's response with typing indicator
       const botCard = document.createElement('div');
       botCard.className = 'card bot';
       botCard.innerHTML = `
@@ -630,31 +834,41 @@
           throw new Error(`HTTP error! Status: ${res.status}`);
         }
 
-        // 4. Read the stream
+        // 4. Read the stream with buffer for better line handling
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let fullResponse = "";
+        let buffer = "";
         botMessageContent.innerHTML = ""; // Clear the cursor
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n').filter(line => line.trim() !== "");
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ""; // Keep the last incomplete line in buffer
 
           for (const line of lines) {
+            if (line.trim() === "") continue;
+            
             if (line.startsWith('data: ')) {
               const jsonStr = line.replace('data: ', '');
               if (jsonStr === '[DONE]') break;
+              
               try {
                 const parsed = JSON.parse(jsonStr);
                 const content = parsed.choices[0].delta.content;
+                
                 if (content) {
                   fullResponse += content;
-                  // IMPORTANT: Update the text content directly for performance.
-                  // We will apply full markdown at the end.
+                  
+                  // Update content with smooth transition
+                  botMessageContent.classList.add('updating');
                   botMessageContent.textContent = fullResponse;
+                  botMessageContent.classList.remove('updating');
+                  
                   chatContainer.scrollTop = chatContainer.scrollHeight;
                 }
               } catch (e) {
@@ -664,8 +878,31 @@
           }
         }
         
+        // Process any remaining buffer
+        if (buffer.trim() !== "") {
+          if (buffer.startsWith('data: ')) {
+            const jsonStr = buffer.replace('data: ', '');
+            if (jsonStr !== '[DONE]') {
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const content = parsed.choices[0].delta.content;
+                if (content) {
+                  fullResponse += content;
+                }
+              } catch (e) {
+                console.error("Error parsing final buffer JSON:", e);
+              }
+            }
+          }
+        }
+        
         // 5. Once streaming is complete, apply the final markdown formatting
+        botMessageContent.classList.add('updating');
         botMessageContent.innerHTML = markdownToHTML(fullResponse);
+        botMessageContent.classList.remove('updating');
+        
+        // 6. Apply syntax highlighting to code blocks if available
+        highlightCodeBlocks();
 
       } catch (e) {
         botMessageContent.innerHTML = `<p><strong>Error:</strong> ${escapeHTML(e.message)}</p>`;
@@ -677,13 +914,50 @@
       }
     }
 
+    // Simple code highlighting function
+    function highlightCodeBlocks() {
+      document.querySelectorAll('.code-block').forEach(block => {
+        // This is a simple highlight - you could integrate a proper syntax highlighter here
+        const code = block.textContent;
+        // Simple keyword highlighting for common languages
+        const keywords = [
+          'function', 'var', 'let', 'const', 'if', 'else', 'for', 'while', 
+          'return', 'class', 'import', 'export', 'from', 'default'
+        ];
+        
+        let highlighted = escapeHTML(code);
+        
+        keywords.forEach(keyword => {
+          const regex = new RegExp(`\\b${keyword}\\b`, 'g');
+          highlighted = highlighted.replace(regex, `<span style="color: #ff79c6;">${keyword}</span>`);
+        });
+        
+        // Highlight strings
+        highlighted = highlighted.replace(/'([^']*)'/g, `<span style="color: #f1fa8c;">'$1'</span>`);
+        highlighted = highlighted.replace(/"([^"]*)"/g, `<span style="color: #f1fa8c;">"$1"</span>`);
+        
+        // Highlight numbers
+        highlighted = highlighted.replace(/\b(\d+)\b/g, `<span style="color: #bd93f9;">$1</span>`);
+        
+        // Highlight comments
+        highlighted = highlighted.replace(/\/\/.*$/gm, `<span style="color: #6272a4;">$&</span>`);
+        
+        block.innerHTML = `<code>${highlighted}</code>`;
+      });
+    }
+
     // Event Listeners
     sendButton.addEventListener("click", handleSend);
     input.addEventListener("keypress", (e) => {
       if (e.key === "Enter") {
-        e.preventDefault(); // Prevent form submission if it's inside a form
+        e.preventDefault();
         handleSend();
       }
+    });
+    
+    // Auto-focus on input when page loads
+    window.addEventListener('load', () => {
+      input.focus();
     });
   </script>
 </body>
