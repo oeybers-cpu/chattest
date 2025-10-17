@@ -72,6 +72,10 @@ export default async function handler(req) {
 
           for (const parsedLine of parsedLines) {
             try {
+              if (!parsedLine.startsWith("{")) {
+                console.warn("Skipping malformed chunk:", parsedLine);
+                continue; // ✅ Skip malformed lines
+              }
               const parsed = JSON.parse(parsedLine);
               const delta = parsed.choices?.[0]?.delta || parsed.output || parsed; // Handles both GPT and workflow formats
               controller.enqueue(encoder.encode(`data: ${JSON.stringify(delta)}\n\n`));
