@@ -20,10 +20,21 @@ export default async function handler(req) {
       return new Response('Invalid request: "messages" array not found.', { status: 400 });
     }
 
+    // *** MODIFICATION 1: Add a System Prompt for better control (recommended) ***
+    const systemMessage = {
+      role: "system",
+      content: "You are a helpful and harmless AI assistant. Your responses should be clear, truthful, and relevant to the user's query.",
+    };
+    
+    // Combine the system message with the user's history
+    const fullMessages = [systemMessage, ...messages];
+
+
     // 3. Prepare the request payload for OpenAI
     const payload = {
-      model: "gpt-4o",
-      messages: messages,
+      // *** MODIFICATION 2: Changed model to a placeholder for GPT-5 ***
+      model: "gpt-5-turbo", // Placeholder for the future GPT-5 model name
+      messages: fullMessages,
       stream: true, // THIS IS THE KEY CHANGE TO ENABLE STREAMING
     };
 
