@@ -3,73 +3,50 @@
 import { OpenAI } from 'openai';
 import { OpenAIStream, StreamingTextResponse } from 'ai';
 
-// Only import workflow if we're using it
-let workflowModule = null;
-if (process.env.USE_WORKFLOW === 'true') {
-  try {
-    workflowModule = await import('@openai/agents');
-  } catch (error) {
-    console.warn('Workflow module not available, falling back to direct API');
-  }
-}
-
-export const config = {
-  runtime: "edge",
-};
-
-// Validate required environment variables
-function validateEnv() {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY environment variable is required');
-  }
-  
-  if (process.env.USE_WORKFLOW === 'true' && !process.env.WORKFLOW_ID) {
-    console.warn('USE_WORKFLOW is true but WORKFLOW_ID is not set. Falling back to direct API.');
-  }
-}
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
+// --- Configuration ---
 const SYSTEM_PROMPT = {
   role: 'system',
   content: `You are ALLChat, an expert academic literacy advisor. Your purpose is to help students understand and develop skills in academic literacy.`
 };
 
+// --- Vercel Edge Function Config ---
+export const config = {
+  runtime: "edge",
+};
+
+// --- Main Request Handler ---
 export default async function handler(req) {
   if (req.method !== 'POST') {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
   try {
-    // Validate environment
-    validateEnv();
-    
+    // Validate that the OpenAI API key exists.
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('Server configuration error: OPENAI_API_KEY is missing.');
+    }
+
     const { messages } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
       return new Response('Invalid request: "messages" array not found.', { status: 400 });
     }
 
-    // Determine which method to use
-    const useWorkflow = process.env.USE_WORKFLOW === 'true' && 
-                       process.env.WORKFLOW_ID && 
-                       workflowModule;
+    // Check if the workflow mode should be used.
+    const shouldUseWorkflow = process.env.USE_WORKFLOW === 'true' && process.env.WORKFLOW_ID;
 
-    if (useWorkflow) {
+    if (shouldUseWorkflow) {
+      // If workflow mode is enabled, try it first.
       return await handleWorkflowResponse(messages);
     } else {
+      // Otherwise, go directly to the standard OpenAI chat.
       return await handleDirectOpenAI(messages);
     }
 
   } catch (error) {
-    console.error("Error in /api/chat handler:", error);
-    
+    console.error("Critical Error in /api/chat handler:", error.message);
     return new Response(
-      JSON.stringify({ 
-        error: "Service temporarily unavailable. Please try again later." 
-      }), {
+      JSON.stringify({ error: "An internal server error occurred." }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       }
@@ -77,57 +54,55 @@ export default async function handler(req) {
   }
 }
 
+// --- Workflow Handling Function ---
 async function handleWorkflowResponse(messages) {
   try {
-    const latestMessage = messages[messages.length - 1];
-    const userInput = latestMessage?.content;
+    // **FIX APPLIED HERE**: Dynamically import the module *inside* the function.
+    const { invokeWorkflow } = await import('@openai/agents');
 
-    if (!userInput) {
-      throw new Error('No user message found');
+    const latestMessage = messages[messages.length - 1]?.content || "";
+    if (!latestMessage) {
+      throw new Error('No user message found for workflow.');
     }
 
-    const result = await workflowModule.invokeWorkflow({
+    const result = await invokeWorkflow({
       workflow_id: process.env.WORKFLOW_ID,
-      input: { text: userInput },
-      api_key: process.env.OPENAI_API_KEY,
+      input: { text: latestMessage },
     });
 
-    const workflowResponse = result.output?.response || 
-                           result.output?.text || 
-                           result.text || 
-                           'No response from workflow';
+    const workflowResponse = result.output?.response || 'Workflow completed, but no text was returned.';
 
-    return new Response(
-      JSON.stringify({ 
-        response: workflowResponse,
-        source: 'workflow'
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    // The workflow API does not stream, so we return a single JSON response.
+    return new Response(JSON.stringify({ response: workflowResponse }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
 
   } catch (workflowError) {
-    console.error('Workflow execution failed:', workflowError);
+    console.warn('Workflow execution failed, falling back to direct API. Error:', workflowError.message);
+    // If the workflow fails for any reason, fall back to the reliable direct method.
     return await handleDirectOpenAI(messages);
   }
 }
 
+// --- Direct OpenAI Chat Handling Function ---
 async function handleDirectOpenAI(messages) {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
   try {
     const response = await openai.chat.completions.create({
       model: process.env.OPENAI_MODEL || "gpt-4o",
       stream: true,
       messages: [SYSTEM_PROMPT, ...messages],
-      temperature: 0.7,
-      max_tokens: 2000,
     });
 
+    // Use the Vercel AI SDK to handle the stream correctly.
     const stream = OpenAIStream(response);
     return new StreamingTextResponse(stream);
 
   } catch (openaiError) {
-    console.error('OpenAI API error:', openaiError);
-    throw new Error('Failed to get AI response');
+    console.error('Direct OpenAI API call failed:', openaiError.message);
+    // This is a critical failure, so we throw an error to be caught by the main handler.
+    throw new Error('Failed to get response from OpenAI.');
   }
 }
