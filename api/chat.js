@@ -1,70 +1,83 @@
-// For faster responses, run this on Vercel's Edge Network
+// api/chat.js
+
+// Use the Edge runtime for optimal streaming performance
 export const config = {
   runtime: "edge",
 };
 
 // The main API handler function
 export default async function handler(req) {
-  // 1. Check for POST request
+  // 1. Check for POST request and get messages
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response("Method Not Allowed", { status: 405 });
   }
+  const { messages } = await req.json();
 
-  try {
-    // 2. Get the user's messages from the request body
-    const { messages } = await req.json();
+  // 2. Prepare the payload for OpenAI
+  const payload = {
+    model: "gpt-4o",
+    messages: messages,
+    stream: true, // Enable streaming
+  };
 
-    // Validate that messages exist and is an array
-    if (!messages || !Array.isArray(messages)) {
-      return new Response(JSON.stringify({ error: 'Invalid request: "messages" array not found.' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
+  // 3. Create a TransformStream to intercept and modify the data
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  let counter = 0;
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      // 4. Make the call to OpenAI
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload ),
       });
-    }
 
-    // 3. Prepare the request to OpenAI Agent Builder workflow
-    const payload = {
-      input: { text: messages[messages.length - 1]?.content || "" }
-    };
+      // 5. Read from the OpenAI stream chunk by chunk
+      const reader = res.body.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break; // Exit loop when OpenAI stream is done
+        }
+        
+        // Decode the chunk and process each line
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n");
+        
+        const parsedLines = lines
+          .map((line) => line.replace(/^data: /, "").trim()) // Remove "data: " prefix
+          .filter((line) => line !== "" && line !== "[DONE]"); // Filter out empty lines and the [DONE] signal
 
-    // 4. Call the OpenAI workflow endpoint
-    const response = await fetch(`https://api.openai.com/v1/workflows/${process.env.WORKFLOW_ID}/invoke`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+        for (const parsedLine of parsedLines) {
+          try {
+            const parsed = JSON.parse(parsedLine);
+            const { choices } = parsed;
+            const delta = choices[0].delta;
+            
+            // Re-encode the valid data and send it to the frontend
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(delta)}\n\n`));
+          } catch (error) {
+            console.error("Could not JSON parse stream message", parsedLine, error);
+          }
+        }
+      }
+      controller.close(); // Close the stream when we're done
+    },
+  });
 
-    // Check for errors from OpenAI
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('OpenAI API Error:', errorData);
-      return new Response(JSON.stringify({ error: 'Failed to get response from OpenAI.', details: errorData }), {
-        status: response.status,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    // 5. Send the successful response back to your frontend
-    const data = await response.json();
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
-
-  } catch (error) {
-    console.error('Handler Error:', error);
-    return new Response(JSON.stringify({ error: 'An internal server error occurred.' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+  // 6. Return the new, cleaned-up stream to the frontend
+  return new Response(stream, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+    },
+  });
 }
