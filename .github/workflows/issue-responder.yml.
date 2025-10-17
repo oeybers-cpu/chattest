@@ -1,0 +1,24 @@
+# A descriptive name for your workflow
+name: AI Issue Responder
+
+# 1. Defines the trigger for this workflow
+on:
+  issues:
+    types: [opened]
+
+# 2. Defines the job(s) to run
+jobs:
+  respond_to_issue:
+    # 3. Specifies the runner environment
+    runs-on: ubuntu-latest
+
+    # 4. Defines the sequence of steps
+    steps:
+      - name: Step A - Placeholder for checking out code
+        run: echo "Code checkout step will go here."
+
+      - name: Step B - Placeholder for calling OpenAI
+        run: echo "OpenAI API call will go here."
+
+      - name: Step C - Placeholder for commenting on the issue
+        run: echo "Posting a comment will go here."
