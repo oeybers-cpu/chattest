@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ALLChat</title>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js  "></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     :root {
       --primary: #3a86ff;
@@ -41,6 +41,22 @@
       box-sizing: border-box;
     }
 
+    /* --- ADD THIS NEW STYLE FOR THE TYPING INDICATOR --- */
+    .pulsing-cursor {
+        display: inline-block;
+        width: 10px;
+        height: 1.5em; /* Match font height */
+        background-color: var(--light);
+        border-radius: 2px;
+        animation: pulse 1s infinite;
+        vertical-align: text-bottom;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+    }
+    /* --- (All your other styles remain the same) --- */
+
     .top-header {
       background: var(--darker);
       border-bottom: 1px solid var(--border-color);
@@ -67,7 +83,6 @@
       color: var(--text-gray);
     }
 
-    /* Updated Academic Literacy Hub tab with dark orange styling */
     .academic-hub-link {
       color: var(--light);
       text-decoration: none;
@@ -87,7 +102,6 @@
       box-shadow: 0 4px 12px rgba(230, 81, 0, 0.2);
     }
 
-    /* All other tabs - Blue style like Eybers Articles/Chapters */
     .eyers-link, .allchat-header-tab, .eybers-footer-link, .response-button {
       color: var(--light);
       text-decoration: none;
@@ -373,12 +387,10 @@
         margin: 0.25rem 0;
       }
       
-      /* Hide Top and Home links on mobile */
       .footer-left .desktop-only {
         display: none;
       }
       
-      /* Mobile-specific button container for input area */
       .mobile-button-row {
         display: flex;
         flex-direction: row;
@@ -398,7 +410,7 @@
       <h1>ALLChat</h1>
       <p>Ask any question about literacies or knowledge</p>
     </div>
-    <a href="https://oeybers-cpu.github.io/a_lit_models/  " class="academic-hub-link">Academic Literacy Hub</a>
+    <a href="https://oeybers-cpu.github.io/a_lit_models/" class="academic-hub-link">Academic Literacy Hub</a>
   </header>
 
   <div class="chat-container">
@@ -422,61 +434,54 @@
     <div class="footer-left">
       <a href="#" class="eyers-link desktop-only">Top</a>
       <span class="separator desktop-only"> | </span>
-      <a href="https://oeybers-cpu.github.io/a_lit_models/  " class="eyers-link desktop-only">Home</a>
+      <a href="https://oeybers-cpu.github.io/a_lit_models/" class="eyers-link desktop-only">Home</a>
       <span class="separator"> | </span>
       <span>Designed by Dr Oscar Eybers 2025</span>
     </div>
     <div class="footer-right">
-      <a href="https://www.free-counters.org/  " class="eyers-link">... by Free-Counters.org</a>
+      <a href="https://www.free-counters.org/" class="eyers-link">... by Free-Counters.org</a>
       <script type="text/javascript" src="https://www.freevisitorcounters.com/auth.php?id=e6296ca96d429e4da4d7339220ad2b44b6e86672"></script>
-      <script type="text/javascript" src="https://www.freevisitorcounters.com/en/home/counter/1405736/t/3  "></script>
+      <script type="text/javascript" src="https://www.freevisitorcounters.com/en/home/counter/1405736/t/3"></script>
     </div>
   </footer>
 
+  <!-- ================================================================= -->
+  <!-- ==================== REVISED SCRIPT SECTION ===================== -->
+  <!-- ================================================================= -->
   <script>
+    // Helper functions for formatting text
     function escapeHTML(str) {
-      return str.replace(/[&<>"']/g, m => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-      }[m]));
+      return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
     }
     
     function processInline(text) {
-        text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
-        text = text.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
-        text = text.replace(/\*([^\*]+)\*/g, '<em>$1</em>');
-        return text;
+      text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+      text = text.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/\*([^\*]+)\*/g, '<em>$1</em>');
+      return text;
     }
 
     function markdownToHTML(markdown) {
       let html = '';
       let inList = false;
-
       const lines = markdown.split('\n');
       for (let i = 0; i < lines.length; i++) {
         let line = lines[i].trim();
-
         if (inList && !line.startsWith('- ')) {
-            html += '</ul>';
-            inList = false;
+          html += '</ul>';
+          inList = false;
         }
-
         const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
         if (headingMatch) {
-            const text = processInline(headingMatch[2]);
-            html += `<strong class="section-title">${text}</strong>`;
-            continue;
+          const text = processInline(headingMatch[2]);
+          html += `<strong class="section-title">${text}</strong>`;
+          continue;
         }
-
         if (line.startsWith('**') && line.endsWith('**') && line.length > 4) {
           const text = processInline(line.substring(2, line.length - 2));
           html += `<strong class="section-title">${text}</strong>`;
           continue;
         }
-
         if (line.startsWith('- ')) {
           if (!inList) {
             html += '<ul>';
@@ -486,51 +491,42 @@
           html += `<li>${text}</li>`;
           continue;
         }
-
         if (line.startsWith('>')) {
-            let blockquoteContent = processInline(line.substring(1).trim());
-            while (i + 1 < lines.length && lines[i + 1].trim().startsWith('>')) {
-                i++;
-                blockquoteContent += ' ' + processInline(lines[i].trim().substring(1).trim());
-            }
-            html += `<div class="card__quote"><p>${blockquoteContent}</p></div>`;
-            continue;
+          let blockquoteContent = processInline(line.substring(1).trim());
+          while (i + 1 < lines.length && lines[i + 1].trim().startsWith('>')) {
+            i++;
+            blockquoteContent += ' ' + processInline(lines[i].trim().substring(1).trim());
+          }
+          html += `<div class="card__quote"><p>${blockquoteContent}</p></div>`;
+          continue;
         }
-
         if (line === '') {
           continue;
         }
-
         const text = processInline(line);
         html += `<p>${text}</p>`;
       }
-
       if (inList) {
         html += '</ul>';
       }
-
       return html;
     }
     
+    // DOM Elements
     const input = document.getElementById("input");
     const out = document.getElementById("out");
     const sendButton = document.getElementById("send");
     const downloadPDFButton = document.getElementById("download-pdf");
-    
+    const chatContainer = document.querySelector('.chat-container');
+
+    // PDF Download Logic (remains the same)
     downloadPDFButton.addEventListener('click', () => {
-      const chatContainer = document.querySelector('.chat-container');
-      if (!chatContainer) return;
-      
       const clone = chatContainer.cloneNode(true);
-      
-      // Remove response input areas from PDF
       clone.querySelectorAll('.response-input-area').forEach(el => el.remove());
-      
       clone.style.backgroundColor = 'white';
       clone.style.padding = '1rem';
       clone.style.fontFamily = 'Arial, sans-serif';
       clone.style.fontSize = '14px';
-      
       const messages = clone.querySelectorAll('.card');
       messages.forEach(msg => {
         msg.style.backgroundColor = 'white';
@@ -540,31 +536,20 @@
         msg.style.borderRadius = '8px';
         msg.style.boxShadow = 'none';
       });
-      
-      clone.querySelectorAll('.user').forEach(msg => {
-        msg.style.backgroundColor = '#f0f0f0';
-      });
-      clone.querySelectorAll('.bot').forEach(msg => {
-        msg.style.backgroundColor = '#f8f8f8';
-      });
-      
+      clone.querySelectorAll('.user').forEach(msg => { msg.style.backgroundColor = '#f0f0f0'; });
+      clone.querySelectorAll('.bot').forEach(msg => { msg.style.backgroundColor = '#f8f8f8'; });
       clone.querySelectorAll('.section-title').forEach(heading => {
         heading.style.color = '#333';
         heading.style.borderBottom = '1px solid #eee';
         heading.style.paddingBottom = '0.5em';
         heading.style.marginBottom = '1.4em';
       });
-      
-      clone.querySelectorAll('.card p').forEach(p => {
-        p.style.marginBottom = '1.2em';
-      });
-      
+      clone.querySelectorAll('.card p').forEach(p => { p.style.marginBottom = '1.2em'; });
       clone.querySelectorAll('.card ul').forEach(ul => {
         ul.style.paddingLeft = '1.5em';
         ul.style.listStyleType = 'disc';
         ul.style.marginBottom = '1.2em';
       });
-      
       clone.querySelectorAll('.card li').forEach(li => {
         li.style.paddingLeft = '0'; 
         const before = li.querySelector('::before');
@@ -572,7 +557,6 @@
         li.style.listStyleType = 'disc';
         li.style.marginBottom = '0.8em';
       });
-      
       clone.querySelectorAll('.card__quote').forEach(blockquote => {
         blockquote.style.borderLeft = '3px solid #3498db';
         blockquote.style.paddingLeft = '1em';
@@ -582,25 +566,21 @@
         blockquote.style.background = '#f8f9fa';
         blockquote.style.borderRadius = '0 4px 4px 0';
       });
-      
       clone.querySelectorAll('.card code').forEach(code => {
         code.style.background = '#f5f5f5';
         code.style.padding = '0.2em 0.4em';
         code.style.borderRadius = '4px';
         code.style.border = '1px solid #ddd';
       });
-      
       clone.querySelectorAll('.card__title').forEach(header => {
         header.style.color = '#333';
         header.style.fontWeight = 'bold';
         header.style.marginBottom = '1em';
       });
-      
       clone.querySelectorAll('.card .message-content').forEach(content => {
         content.style.color = '#333';
         content.style.lineHeight = '1.6';
       });
-      
       const opt = {
         margin: 1,
         filename: 'chat-history.pdf',
@@ -608,58 +588,102 @@
         html2canvas: { scale: 2, backgroundColor: '#ffffff' },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
-      
       html2pdf().from(clone).set(opt).save();
     });
     
-    sendButton.addEventListener("click", async () => {
-      const content = input.value.trim();
-      if (!content) return;
+    // --- REVISED SEND FUNCTION WITH STREAMING ---
+    async function handleSend() {
+      const userContent = input.value.trim();
+      if (!userContent) return;
       
-      const escapedUser = escapeHTML(content);
+      // 1. Display the user's message immediately
+      const escapedUser = escapeHTML(userContent);
       out.innerHTML += `
         <div class="card user">
           <div class="card__title">You</div>
           <div class="message-content">${escapedUser}</div>
         </div>`;
       input.value = '';
-      
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      // 2. Create a placeholder for the bot's response
+      const botCard = document.createElement('div');
+      botCard.className = 'card bot';
+      botCard.innerHTML = `
+        <div class="card__title">ALLChat</div>
+        <div class="message-content">
+          <span class="pulsing-cursor"></span>
+        </div>`;
+      out.appendChild(botCard);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      const botMessageContent = botCard.querySelector('.message-content');
+
       try {
+        // 3. Fetch the streaming response
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ messages: [{ role: "user", content }] })
+          body: JSON.stringify({ messages: [{ role: "user", content: userContent }] })
         });
         
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+
+        // 4. Read the stream
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let fullResponse = "";
+        botMessageContent.innerHTML = ""; // Clear the cursor
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n').filter(line => line.trim() !== "");
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.replace('data: ', '');
+              if (jsonStr === '[DONE]') break;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const content = parsed.choices[0].delta.content;
+                if (content) {
+                  fullResponse += content;
+                  // IMPORTANT: Update the text content directly for performance.
+                  // We will apply full markdown at the end.
+                  botMessageContent.textContent = fullResponse;
+                  chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+              } catch (e) {
+                console.error("Error parsing stream JSON:", e);
+              }
+            }
+          }
+        }
         
-        const data = await res.json();
-        const reply = data?.choices?.[0]?.message?.content || "No response from server";
-        
-        const htmlResponse = markdownToHTML(reply);
-        out.innerHTML += `
-          <div class="card bot">
-            <div class="card__title">ALLChat</div>
-            <div class="message-content">${htmlResponse}</div>
-          </div>`;
-          
-        // Focus back on the main input after receiving response
-        input.focus();
+        // 5. Once streaming is complete, apply the final markdown formatting
+        botMessageContent.innerHTML = markdownToHTML(fullResponse);
+
       } catch (e) {
-        const escapedError = escapeHTML(e.message);
-        out.innerHTML += `
-          <div class="card error">
-            <div class="card__title">Error</div>
-            <div class="message-content">${escapedError}</div>
-          </div>`;
+        botMessageContent.innerHTML = `<p><strong>Error:</strong> ${escapeHTML(e.message)}</p>`;
+        botMessageContent.style.color = '#ff5c5c';
+      } finally {
+        // Re-focus on the main input after everything is done
+        input.focus();
+        chatContainer.scrollTop = chatContainer.scrollHeight;
       }
-      
-      const container = document.querySelector('.chat-container');
-      container.scrollTop = container.scrollHeight;
-    });
-    
+    }
+
+    // Event Listeners
+    sendButton.addEventListener("click", handleSend);
     input.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") sendButton.click();
+      if (e.key === "Enter") {
+        e.preventDefault(); // Prevent form submission if it's inside a form
+        handleSend();
+      }
     });
   </script>
 </body>
