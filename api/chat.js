@@ -1,76 +1,73 @@
-export const config = { runtime: "edge" };
+// For faster responses, run this on Vercel's Edge Network
+export const config = {
+  runtime: "edge",
+};
 
+// The main API handler function
 export default async function handler(req) {
-  // Only allow POST requests
+  // 1. Check for POST request
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 
   try {
-    const messages = await req.json();
-    
-    // Validate the request structure
-    if (!messages?.messages || !Array.isArray(messages.messages)) {
-      return new Response(JSON.stringify({ error: 'Invalid request format' }), {
+    // 2. Get the user's messages from the request body
+    const { messages } = await req.json();
+
+    // Validate that messages exist and is an array
+    if (!messages || !Array.isArray(messages)) {
+      return new Response(JSON.stringify({ error: 'Invalid request: "messages" array not found.' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // Check if API key is available
-    if (!process.env.OPENAI_API_KEY) {
-      return new Response(JSON.stringify({ error: 'API key not configured' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+    // 3. Prepare the request to OpenAI
+    const payload = {
+      model: "gpt-4o", // CORRECTED: Use a valid model like gpt-4o or gpt-3.5-turbo
+      messages: messages,
+      // You can add other parameters here if needed
+      // max_tokens: 1000,
+    };
 
+    // 4. Call the OpenAI API
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: "gpt-5", // Using GPT-5 as specified
-        messages: messages.messages,
-        // Optional parameters you might want to include:
-        // max_tokens: 4000,
-        // temperature: 0.7,
-        // stream: false
-      })
+      body: JSON.stringify(payload ),
     });
 
+    // Check for errors from OpenAI
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('OpenAI API error:', errorData);
-      return new Response(JSON.stringify({ 
-        error: 'OpenAI API request failed',
-        details: errorData 
-      }), {
+      const errorData = await response.text(); // Use .text() for better error visibility
+      console.error('OpenAI API Error:', errorData);
+      return new Response(JSON.stringify({ error: 'Failed to get response from OpenAI.', details: errorData }), {
         status: response.status,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
+    // 5. Send the successful response back to your frontend
     const data = await response.json();
     return new Response(JSON.stringify(data), {
       status: 200,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*', // Adjust based on your CORS needs
-        'Access-Control-Allow-Methods': 'POST'
-      }
+        'Access-Control-Allow-Origin': '*', // Be more specific in production if possible
+      },
     });
 
   } catch (error) {
-    console.error('Handler error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error('Handler Error:', error);
+    return new Response(JSON.stringify({ error: 'An internal server error occurred.' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 }
