@@ -1,68 +1,56 @@
-// For faster responses, run this on Vercel's Edge Network
+// api/chat.js
+
+// Use the Edge runtime for optimal streaming performance
 export const config = {
   runtime: "edge",
 };
 
 // The main API handler function
 export default async function handler(req) {
-  // --- START OF DIAGNOSTIC CODE ---
-  const apiKey = process.env.OPENAI_API_KEY;
-  let apiKeyStatus;
-
-  if (!apiKey) {
-    apiKeyStatus = "API Key is NOT FOUND in environment variables.";
-  } else {
-    // Log the first 5 and last 4 characters to verify the key without exposing it.
-    apiKeyStatus = `API Key Found. Starts with: ${apiKey.substring(0, 5)}, Ends with: ${apiKey.slice(-4)}`;
-  }
-  
-  // Log this status to Vercel's logs.
-  console.log(apiKeyStatus);
-  // --- END OF DIAGNOSTIC CODE ---
-
+  // 1. Check for POST request
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
+    return new Response("Method Not Allowed", { status: 405 });
   }
 
   try {
+    // 2. Get the user's messages from the request body
     const { messages } = await req.json();
 
-    if (!messages || !Array.isArray(messages)) {
-      return new Response(JSON.stringify({ error: 'Invalid request: "messages" array not found.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    if (!messages) {
+      return new Response('Invalid request: "messages" array not found.', { status: 400 });
     }
 
-    // Check if the key exists (again, for safety)
-    if (!apiKey) {
-        return new Response(JSON.stringify({ error: 'Server configuration error: API Key not found.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-    }
-
+    // 3. Prepare the request payload for OpenAI
     const payload = {
       model: "gpt-4o",
       messages: messages,
+      stream: true, // THIS IS THE KEY CHANGE TO ENABLE STREAMING
     };
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    // 4. Call the OpenAI API and get a streaming response
+    const stream = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`, // Use the variable we defined
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload ),
     });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('OpenAI API Error:', errorData);
-      // Also log our API key status here for context on the error
-      console.log(`Error occurred with key: ${apiKeyStatus}`);
-      return new Response(JSON.stringify({ error: 'Failed to get response from OpenAI.', details: errorData }), { status: response.status, headers: { 'Content-Type': 'application/json' } });
-    }
-
-    const data = await response.json();
-    return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+    // 5. Pipe the streaming response directly back to our client
+    // The Vercel Edge runtime automatically handles this efficiently.
+    return new Response(stream.body, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/event-stream', // Important: Set the content type for streaming
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*', // Adjust CORS as needed
+      },
+    });
 
   } catch (error) {
     console.error('Handler Error:', error);
-    return new Response(JSON.stringify({ error: 'An internal server error occurred.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    return new Response("An internal server error occurred.", { status: 500 });
   }
 }
