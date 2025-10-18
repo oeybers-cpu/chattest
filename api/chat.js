@@ -38,7 +38,7 @@ export default async function handler(req) {
         headers: { 'Content-Type': 'application/json' },
       });
     } else {
-      // GPT-5 non-streaming mode
+      // GPT-4o non-streaming mode
       const systemPrompt = {
         role: 'system',
         content:
@@ -46,12 +46,13 @@ export default async function handler(req) {
       };
 
       const response = await openai.chat.completions.create({
-        model: 'gpt-5', // Adjust if your model name is different
+        model: 'gpt-4o',
         stream: false,
-        messages: [systemPrompt, ...messages],
+        max_tokens: 1024,
+        messages: [systemPrompt, ...messages.slice(-3)],
       });
 
-      let aiResponseContent = '[No response received from GPT-5.]';
+      let aiResponseContent = '[No response received from GPT-4o.]';
 
       if (
         response?.choices &&
@@ -61,7 +62,7 @@ export default async function handler(req) {
         aiResponseContent = response.choices[0].message.content;
       } else {
         console.warn(
-          'GPT-5 returned unexpected structure:',
+          'GPT-4o returned unexpected structure:',
           JSON.stringify(response, null, 2)
         );
       }
@@ -76,4 +77,3 @@ export default async function handler(req) {
     return new Response('An internal server error occurred.', { status: 500 });
   }
 }
-
