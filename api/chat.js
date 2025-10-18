@@ -1,6 +1,5 @@
 import { OpenAI } from 'openai';
 import { invokeWorkflow } from '@openai/agents';
-import { OpenAIStream, StreamingTextResponse } from 'ai';
 
 export const config = {
   runtime: 'edge',
@@ -39,7 +38,7 @@ export default async function handler(req) {
         headers: { 'Content-Type': 'application/json' },
       });
     } else {
-      // Raw GPT-4o streaming mode
+      // Raw GPT-4o non-streaming mode
       const systemPrompt = {
         role: 'system',
         content:
@@ -48,12 +47,16 @@ export default async function handler(req) {
 
       const response = await openai.chat.completions.create({
         model: 'gpt-4o',
-        stream: true,
+        stream: false,
         messages: [systemPrompt, ...messages],
       });
 
-      const stream = OpenAIStream(response);
-      return new StreamingTextResponse(stream);
+      const aiResponseContent = response.choices[0].message.content;
+
+      return new Response(JSON.stringify({ response: aiResponseContent }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
   } catch (error) {
     console.error('Error in /api/chat handler:', error);
