@@ -41,7 +41,7 @@
       box-sizing: border-box;
     }
 
-    /* Improved typing indicator */
+    /* Enhanced typing indicator */
     .pulsing-cursor {
         display: inline-block;
         width: 10px;
@@ -57,13 +57,30 @@
         50% { opacity: 0; }
     }
 
-    /* Smooth transition for content updates */
-    .message-content {
-      transition: opacity 0.3s ease;
+    /* Smooth streaming animation for text */
+    .streaming-text {
+      opacity: 0.9;
+      transition: opacity 0.2s ease;
     }
 
-    .message-content.updating {
-      opacity: 0.7;
+    .streaming-text.complete {
+      opacity: 1;
+    }
+
+    /* Message content styling */
+    .message-content {
+      line-height: 1.7;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .message-content p {
+      margin-bottom: 1rem;
+    }
+
+    .message-content p:last-child {
+      margin-bottom: 0;
     }
 
     /* Better formatting for code blocks */
@@ -508,7 +525,7 @@
       <button id="send" class="eyers-link">Send</button>
       <button class="eyers-link pdf-download-btn" id="download-pdf">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M19 12H5v2h14v-2zm-6 7h-2v-2h2v2zm4-12h-2v2h2v-2zm-4 0h-2v2h2v-2zm-4 0h-2v2h2v-2zm-4 0h-2v2h2v-2zm4 9h-2v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/>
+          <path d="M19 12H5v2h14v-2zm-6 7h-2v-2h2v2zm4-12h-2v2h2v-2zm-4 0h-2v2h2v-2zm-4 0h-2v2h2v-2zm4 9h-2v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/>
         </svg>
         PDF
       </button>
@@ -795,9 +812,37 @@
       html2pdf().from(clone).set(opt).save();
     });
     
-    // =================================================================
-    // ========= THIS IS THE ONLY FUNCTION THAT HAS BEEN CHANGED =========
-    // =================================================================
+    // Enhanced text streaming function
+    function streamText(element, text, speed = 20) {
+      return new Promise((resolve) => {
+        let index = 0;
+        element.innerHTML = '';
+        element.classList.add('streaming-text');
+        
+        function typeCharacter() {
+          if (index < text.length) {
+            // Add next character
+            element.innerHTML += text.charAt(index);
+            index++;
+            
+            // Auto-scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Schedule next character
+            setTimeout(typeCharacter, speed);
+          } else {
+            // Streaming complete
+            element.classList.remove('streaming-text');
+            element.classList.add('complete');
+            resolve();
+          }
+        }
+        
+        typeCharacter();
+      });
+    }
+    
+    // Enhanced handleSend function with proper text streaming
     async function handleSend() {
       const userContent = input.value.trim();
       if (!userContent) return;
@@ -825,7 +870,7 @@
       const botMessageContent = botCard.querySelector('.message-content');
 
       try {
-        // 3. Fetch the "block text" response from your backend
+        // 3. Fetch the response from your backend
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -834,4 +879,44 @@
 
         if (!res.ok) {
           const errorData = await res.json();
-          throw new Error(errorData.error || `HTTP error
+          throw new Error(errorData.error || `HTTP error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        const botResponse = data.content;
+
+        // 4. Remove typing indicator and stream the response
+        botMessageContent.innerHTML = '';
+        
+        // Stream the text character by character for natural reading flow
+        await streamText(botMessageContent, botResponse, 15);
+        
+        // 5. Apply markdown formatting after streaming is complete
+        const formattedHTML = markdownToHTML(botMessageContent.textContent);
+        botMessageContent.innerHTML = formattedHTML;
+        
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      } catch (error) {
+        // Handle errors gracefully
+        botMessageContent.innerHTML = `Sorry, I encountered an error: ${escapeHTML(error.message)}`;
+        botMessageContent.classList.remove('streaming-text');
+        console.error('Chat error:', error);
+      }
+    }
+
+    // Event listeners
+    sendButton.addEventListener('click', handleSend);
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        handleSend();
+      }
+    });
+
+    // Focus input on page load
+    window.addEventListener('load', () => {
+      input.focus();
+    });
+  </script>
+</body>
+</html>
