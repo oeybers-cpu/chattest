@@ -38,7 +38,7 @@ export default async function handler(req) {
         headers: { 'Content-Type': 'application/json' },
       });
     } else {
-      // Raw GPT-4o non-streaming mode
+      // GPT-5 non-streaming mode
       const systemPrompt = {
         role: 'system',
         content:
@@ -46,12 +46,15 @@ export default async function handler(req) {
       };
 
       const response = await openai.chat.completions.create({
-        model: 'gpt-4o',
+        model: 'gpt-5', // Adjust if your model name is different
         stream: false,
         messages: [systemPrompt, ...messages],
       });
 
-      const aiResponseContent = response.choices[0].message.content;
+      const aiResponseContent =
+        response?.choices?.[0]?.message?.content || 'No response from GPT-5.';
+
+      console.log('GPT-5 response:', JSON.stringify(response, null, 2));
 
       return new Response(JSON.stringify({ response: aiResponseContent }), {
         status: 200,
