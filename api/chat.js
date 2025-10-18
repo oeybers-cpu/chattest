@@ -51,10 +51,18 @@ export default async function handler(req) {
         messages: [systemPrompt, ...messages],
       });
 
-      const aiResponseContent =
-        response?.choices?.[0]?.message?.content || 'No response from GPT-5.';
+     let aiResponseContent = '[No response received from GPT-5.]';
 
-      console.log('GPT-5 response:', JSON.stringify(response, null, 2));
+if (
+  response?.choices &&
+  Array.isArray(response.choices) &&
+  response.choices[0]?.message?.content
+) {
+  aiResponseContent = response.choices[0].message.content;
+} else {
+  console.warn('GPT-5 returned unexpected structure:', JSON.stringify(response, null, 2));
+}
+
 
       return new Response(JSON.stringify({ response: aiResponseContent }), {
         status: 200,
