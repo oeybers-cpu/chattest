@@ -1,65 +1,62 @@
-// Filename: /api/chat.js
-// This version is configured for "block text" (non-streaming) responses.
-
 import { OpenAI } from 'openai';
+import { invokeWorkflow } from '@openai/agents';
+import { OpenAIStream, StreamingTextResponse } from 'ai';
 
-// --- Configuration ---
-const SYSTEM_PROMPT = {
-  role: 'system',
-  content: `You are ALLChat, an expert academic literacy advisor. Your purpose is to help students understand and develop skills in academic literacy. Your communication style must be clear, engaging, and fluid. Write in complete, well-structured sentences.`
-};
-
-// --- Vercel Edge Function Config ---
 export const config = {
-  runtime: "edge",
+  runtime: 'edge',
 };
 
-// --- Main Request Handler ---
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
 export default async function handler(req) {
   if (req.method !== 'POST') {
-    return new Response("Method Not Allowed", { status: 405 });
+    return new Response('Method Not Allowed', { status: 405 });
   }
 
   try {
-    // Validate that the OpenAI API key exists.
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('Server configuration error: OPENAI_API_KEY is missing.');
-    }
-
-    const { messages } = await req.json();
+    const { messages, mode = 'workflow' } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
-      return new Response('Invalid request: "messages" array not found.', { status: 400 });
+      return new Response('Invalid request: "messages" array not found.', {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    // --- Direct OpenAI Chat (Non-Streaming) ---
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    if (mode === 'workflow') {
+      // Agent Builder workflow mode
+      const inputText = messages[messages.length - 1]?.content || '';
+      const result = await invokeWorkflow({
+        workflow_id: process.env.WORKFLOW_ID,
+        input: { text: inputText },
+        api_key: process.env.OPENAI_API_KEY,
+      });
 
-    // Ask OpenAI for a standard, non-streaming chat completion.
-    const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || "gpt-4o",
-      // ** CHANGE: `stream: true` has been removed. **
-      messages: [SYSTEM_PROMPT, ...messages],
-    });
-
-    // Extract the content from the first choice in the response.
-    const aiResponseContent = response.choices[0].message.content;
-
-    // ** CHANGE: Return a standard JSON response instead of a stream. **
-    return new Response(
-      JSON.stringify({ response: aiResponseContent }), {
+      return new Response(JSON.stringify(result), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
-      }
-    );
+      });
+    } else {
+      // Raw GPT-4o streaming mode
+      const systemPrompt = {
+        role: 'system',
+        content:
+          'You are an expert academic advisor. Your purpose is to help students understand and develop skills in academic literacy. Provide clear, well-structured, and concise explanations. Define key terms and use examples. Your tone should be encouraging and educational.',
+      };
 
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        stream: true,
+        messages: [systemPrompt, ...messages],
+      });
+
+      const stream = OpenAIStream(response);
+      return new StreamingTextResponse(stream);
+    }
   } catch (error) {
-    console.error("Critical Error in /api/chat handler:", error.message);
-    return new Response(
-      JSON.stringify({ error: "An internal server error occurred." }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    console.error('Error in /api/chat handler:', error);
+    return new Response('An internal server error occurred.', { status: 500 });
   }
 }
